@@ -7,6 +7,14 @@ Audio demo page for our IEEE Access submission.
 Eojin Kim, Chanjun Chun
 Department of Computer Engineering, Chosun University, Gwangju, Republic of Korea
 
+![Overview of the SB-CFM pipeline: a target log-mel spectrogram and a Gaussian source are joined by a Schrodinger-bridge path and regressed by a conditional velocity U-Net; at inference an SDE sampler with classifier-free guidance produces a mel spectrogram that HiFi-GAN renders to a waveform.](assets/pipeline.png)
+
+**Fig. 1** — Overview of the proposed pipeline. *Training* (top): a target log-mel spectrogram x₁ and a
+Gaussian source x₀ are joined by the Schrödinger-bridge path into x_t, and the velocity U-Net
+v_θ(x_t, t, c, r) — modulated by class and RMS conditioning — regresses the target velocity under
+L_FM. *Inference* (bottom): the same network is integrated from x₀ by the SDE sampler with
+classifier-free guidance, and HiFi-GAN renders the result.
+
 ---
 
 ## What this is
@@ -56,7 +64,15 @@ not the challenge entry built on it, which added task-specific pre-training on e
 And our guidance scale is tuned per scene on the development split while the baselines run at
 their published defaults.
 
-Demo page: https://jjj33325.github.io/sbcfm-demo
+![Mel-spectrogram comparison across the seven Foley categories, one row per system: the original recording, PixelSNAIL, MambaFoley, T-Foley, AudioLDM, OT-CFM, and SB-CFM.](assets/spectrograms.png)
+
+**Fig. 2** — Mel-spectrogram comparison across the seven categories. Rows, top to bottom: original
+recording, PixelSNAIL, MambaFoley, T-Foley, AudioLDM, OT-CFM (our σ=0 ablation), SB-CFM. SB-CFM most
+closely reproduces the onsets of transient sounds and the harmonic structure of tonal ones; the
+discrete baseline blurs, and the diffusion baselines add high-frequency artifacts.
+
+Every scene, three clips per system, plus the envelope-tracking overlays are on the
+[demo page](https://jjj33325.github.io/sbcfm-demo).
 
 ## Repository layout
 
