@@ -45,7 +45,7 @@ without seed averaging.
 | MambaFoley | 7.63 | 1.62 | 0.964 | 2.93 | 0.295 | 0.0374 |
 | AudioLDM | 4.77 | 0.86 | 0.981 | 3.02 | 0.340 | – |
 | OT-CFM (ours, σ=0) | 2.90 | 0.61 | 0.983 | 3.18 | 0.339 | 0.0232 |
-| **SB-CFM (ours)** | **2.57** | **0.49** | **0.991** | 3.26 | **0.346** | **0.0230** |
+| **SB-CFM (ours)** | **2.58** | **0.50** | **0.991** | 3.26 | **0.346** | **0.0230** |
 
 ICD is a mode-collapse diagnostic, not a quantity to be maximized. E-L1 applies only to
 temporally conditioned models.
@@ -55,6 +55,8 @@ not the challenge entry built on it, which added task-specific pre-training on e
 And our guidance scale is tuned per scene on the development split while the baselines run at
 their published defaults.
 
+Demo page: https://jjj33325.github.io/sbcfm-demo
+
 ## Repository layout
 
 ```
@@ -63,7 +65,7 @@ assets/                     figures
   pipeline.png              Fig. 1 — training and generation pipeline
   spectrograms.png          Fig. 2 — mel-spectrogram comparison, all systems x all scenes
   envelope.png              Fig. 3 — generated vs. conditioning RMS envelope, per scene
-audio/                      4 s, 22.05 kHz, decoded with the official DCASE HiFi-GAN vocoder
+audio/                      4 s, 22.05 kHz, systems compared as published (see note below)
   original/                 original recording, DCASE 2023 eval split
   pixelsnail/
   tfoley/
@@ -79,6 +81,10 @@ Each system folder holds three clips per scene, named `<scene>_1`, `<scene>_2`, 
 
 Within a column, every temporally conditioned system was given the same RMS envelope, taken from
 the original recording in that column.
+
+Systems are compared as published rather than under a shared vocoder. SB-CFM, OT-CFM, and
+PixelSNAIL use the official DCASE HiFi-GAN vocoder; T-Foley and MambaFoley synthesize waveforms
+directly and use no vocoder; AudioLDM uses the vocoder shipped with its own pipeline.
 
 ## Editing the page
 
