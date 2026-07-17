@@ -78,7 +78,7 @@
   }
   .kicker b{color:var(--teal);font-weight:500}
   .kicker i{width:5px;height:5px;border-radius:50%;background:var(--violet);display:block}
-  header h1{max-width:16ch;margin:0 auto 22px}
+  header h1{margin:0 auto 22px}
   .byline{font-family:"Outfit",sans-serif;font-weight:500;font-size:1.16rem;margin:0 0 3px}
   .affil{color:var(--dim);font-size:.9rem;margin:0 0 26px}
 
@@ -154,6 +154,8 @@
 
   .abs{max-width:92ch}
   .abs p{font-size:1.03rem;line-height:1.82;color:var(--dim);margin:0}
+  .abs strong{color:var(--ink);font-weight:600}
+  .abs em{font-style:normal;color:var(--violet);font-weight:700}
 
   /* ---------- tabs ---------- */
   .tabs{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:22px}
@@ -229,6 +231,7 @@
   @media (max-width:900px){
     .band canvas{height:150px}
     header h1{max-width:none}
+    .brk{display:none}
     .atable th.sys{width:112px}
     .atable th,.atable td{padding:9px 6px}
     .bar-name{display:none}
@@ -256,7 +259,9 @@
 <header>
   <div class="wrap">
     <span class="kicker"><i></i> <b>IEEE Access</b> · DCASE 2023 Task 7 · Foley sound synthesis</span>
-    <h1>Scene-Conditioned Foley Sound Synthesis via <span class="hl">Schrödinger Bridge</span> Conditional Flow Matching</h1>
+    <h1>Scene-Conditioned Foley Sound Synthesis<br class="brk">
+      via <span class="hl">Schrödinger Bridge</span><br class="brk">
+      Conditional Flow Matching</h1>
     <p class="byline">Eojin Kim, &nbsp;Chanjun Chun</p>
     <p class="affil">@ Department of Computer Engineering, Chosun University</p>
 
@@ -301,7 +306,7 @@
       <h2>Abstract</h2>
     </div>
     <div class="abs">
-      <p>Foley sound synthesis, as framed by the DCASE 2023 Task 7 benchmark, aims to generate sound effects conditioned on a scene category, and is inherently a multi-modal, one-to-many problem in which each category admits many acoustically valid realizations while only a few hours of labeled audio are available for training. Existing systems for this benchmark rely on discrete autoregressive priors or iterative diffusion denoising; both can be suboptimal under such small and multi-modal conditions, where preserving sample diversity while maintaining scene fidelity is the central difficulty. We propose a mel-domain Foley synthesis framework based on Schrödinger Bridge Conditional Flow Matching (SB-CFM). Unlike diffusion models that reverse an iterative denoising process, SB-CFM directly learns a velocity field along an optimal-transport-coupled Brownian-bridge path whose time-dependent noise preserves trajectory diversity. A two-dimensional U-Net with zero-initialized adaptive group-normalization conditioning captures scene identity, while the frame-level root-mean-square envelope of the target, injected through block-wise feature-wise modulation, provides explicit temporal control. We further introduce a simple stochastic sampler that perturbs the deterministic update with noise scaled to the training bridge and, combined with classifier-free guidance, balances conditional fidelity and diversity. On the DCASE 2023 Task 7 dataset we evaluate with six complementary metrics covering distributional similarity, conditioning fidelity, diversity, semantic alignment, and temporal fidelity. SB-CFM attains a Fréchet Audio Distance of 2.57, a 46.0% reduction relative to the strongest baseline, along with the lowest Kernel Audio Distance and the lowest temporal error. An automatic neural proxy for mean opinion score further corroborates its perceptual quality.</p>
+      <p>Foley sound synthesis, as framed by the DCASE 2023 Task 7 benchmark, aims to generate sound effects conditioned on a scene category, and is inherently a <strong>multi-modal, one-to-many problem</strong> in which each category admits many acoustically valid realizations while only a few hours of labeled audio are available for training. Existing systems for this benchmark rely on discrete autoregressive priors or iterative diffusion denoising; both can be suboptimal under such small and multi-modal conditions, where <strong>preserving sample diversity while maintaining scene fidelity is the central difficulty</strong>. We propose a mel-domain Foley synthesis framework based on <strong>Schrödinger Bridge Conditional Flow Matching (SB-CFM)</strong>. Unlike diffusion models that reverse an iterative denoising process, SB-CFM <strong>directly learns a velocity field along an optimal-transport-coupled Brownian-bridge path</strong> whose time-dependent noise preserves trajectory diversity. A two-dimensional U-Net with zero-initialized adaptive group-normalization conditioning captures scene identity, while the <strong>frame-level root-mean-square envelope</strong> of the target, injected through block-wise feature-wise modulation, provides <strong>explicit temporal control</strong>. We further introduce a <strong>simple stochastic sampler</strong> that perturbs the deterministic update with noise scaled to the training bridge and, combined with classifier-free guidance, balances conditional fidelity and diversity. On the DCASE 2023 Task 7 dataset we evaluate with <strong>six complementary metrics</strong> covering distributional similarity, conditioning fidelity, diversity, semantic alignment, and temporal fidelity. SB-CFM attains a <em>Fréchet Audio Distance of 2.57, a 46.0% reduction</em> relative to the strongest baseline, along with the <strong>lowest Kernel Audio Distance and the lowest temporal error</strong>. An automatic neural proxy for mean opinion score further corroborates its perceptual quality.</p>
     </div>
   </div>
 </section>
