@@ -284,7 +284,7 @@
     <p class="tldr">
       <b class="k">TL;DR</b>
       A mel-domain Foley synthesizer that transports Gaussian noise to audio along a <strong>stochastic Schrödinger bridge</strong> instead of reversing a diffusion chain, steered by the frame-level RMS envelope.
-      On DCASE 2023 Task 7 it reaches <em>FAD 2.57</em> — a 46.0% reduction over the strongest baseline — with the lowest KAD and the lowest temporal error.
+      On DCASE 2023 Task 7 it reaches <em>FAD 2.58</em> — a 45.9% reduction over the strongest baseline (AudioLDM) — with the lowest KAD and the lowest temporal error.
     </p>
 
     <div class="shortcuts">
@@ -306,7 +306,7 @@
       <h2>Abstract</h2>
     </div>
     <div class="abs">
-      <p>Foley sound synthesis, as framed by the DCASE 2023 Task 7 benchmark, aims to generate sound effects conditioned on a scene category, and is inherently a <strong>multi-modal, one-to-many problem</strong> in which each category admits many acoustically valid realizations while only a few hours of labeled audio are available for training. Existing systems for this benchmark rely on discrete autoregressive priors or iterative diffusion denoising; both can be suboptimal under such small and multi-modal conditions, where <strong>preserving sample diversity while maintaining scene fidelity is the central difficulty</strong>. We propose a mel-domain Foley synthesis framework based on <strong>Schrödinger Bridge Conditional Flow Matching (SB-CFM)</strong>. Unlike diffusion models that reverse an iterative denoising process, SB-CFM <strong>directly learns a velocity field along an optimal-transport-coupled Brownian-bridge path</strong> whose time-dependent noise preserves trajectory diversity. A two-dimensional U-Net with zero-initialized adaptive group-normalization conditioning captures scene identity, while the <strong>frame-level root-mean-square envelope</strong> of the target, injected through block-wise feature-wise modulation, provides <strong>explicit temporal control</strong>. We further introduce a <strong>simple stochastic sampler</strong> that perturbs the deterministic update with noise scaled to the training bridge and, combined with classifier-free guidance, balances conditional fidelity and diversity. On the DCASE 2023 Task 7 dataset we evaluate with <strong>six complementary metrics</strong> covering distributional similarity, conditioning fidelity, diversity, semantic alignment, and temporal fidelity. SB-CFM attains a <em>Fréchet Audio Distance of 2.57, a 46.0% reduction</em> relative to the strongest baseline, along with the <strong>lowest Kernel Audio Distance and the lowest temporal error</strong>. An automatic neural proxy for mean opinion score further corroborates its perceptual quality.</p>
+      <p>Foley sound synthesis, as framed by the DCASE 2023 Task 7 benchmark, aims to generate sound effects conditioned on a scene category, and is inherently a <strong>multi-modal, one-to-many problem</strong> in which each category admits many acoustically valid realizations while only a few hours of labeled audio are available for training. Existing systems for this benchmark rely on discrete autoregressive priors or iterative diffusion denoising; both can be suboptimal under such small and multi-modal conditions, where <strong>preserving sample diversity while maintaining scene fidelity is the central difficulty</strong>. We propose a mel-domain Foley synthesis framework based on <strong>Schrödinger Bridge Conditional Flow Matching (SB-CFM)</strong>. Unlike diffusion models that reverse an iterative denoising process, SB-CFM <strong>directly learns a velocity field along an optimal-transport-coupled Brownian-bridge path</strong> whose time-dependent noise preserves trajectory diversity. A two-dimensional U-Net with zero-initialized adaptive group-normalization conditioning captures scene identity, while the <strong>frame-level root-mean-square envelope</strong> of the target, injected through block-wise feature-wise modulation, provides <strong>explicit temporal control</strong>. We further introduce a <strong>simple stochastic sampler</strong> that perturbs the deterministic update with noise scaled to the training bridge and, combined with classifier-free guidance, balances conditional fidelity and diversity. On the DCASE 2023 Task 7 dataset we evaluate with <strong>six complementary metrics</strong> covering distributional similarity, conditioning fidelity, diversity, semantic alignment, and temporal fidelity. SB-CFM attains a <em>Fréchet Audio Distance of 2.58, a 45.9% reduction</em> relative to the strongest baseline (AudioLDM), along with the <strong>lowest Kernel Audio Distance and the lowest temporal error</strong>. An automatic neural proxy for mean opinion score further corroborates its perceptual quality.</p>
     </div>
   </div>
 </section>
@@ -320,7 +320,7 @@
     </div>
 
     <div class="prose">
-      <p>We generate in the log-mel domain. A standard-Gaussian source is coupled to a target spectrogram by an exact intra-class optimal-transport assignment, and the two are joined by a <strong>Schrödinger-bridge path</strong>: a straight line plus a Brownian-bridge perturbation whose variance vanishes at both endpoints and peaks at t = ½, so the marginals match exactly while every path interior stays randomized. A 2-D U-Net regresses the closed-form velocity — scene identity enters through zero-initialized adaptive group normalization, and the frame-level <strong>RMS envelope</strong> enters through block-wise FiLM, which is what controls <em>when</em> energy appears. At inference a 50-step Euler update, perturbed with noise scaled to the training bridge and guided per scene, is decoded by the official DCASE HiFi-GAN vocoder — the same one every baseline uses. Setting σ = 0 recovers OT-CFM exactly, which is why the ablations below can vary the bridge on its own.</p>
+      <p>We generate in the log-mel domain. A standard-Gaussian source is coupled to a target spectrogram by an exact intra-class optimal-transport assignment, and the two are joined by a <strong>Schrödinger-bridge path</strong>: a straight line plus a Brownian-bridge perturbation whose variance vanishes at both endpoints and peaks at t = ½, so the marginals match exactly while every path interior stays randomized. A 2-D U-Net regresses the closed-form velocity — scene identity enters through zero-initialized adaptive group normalization, and the frame-level <strong>RMS envelope</strong> enters through block-wise FiLM, which is what controls <em>when</em> energy appears. At inference a 50-step Euler update, perturbed with noise scaled to the training bridge and guided per scene, is decoded by the official DCASE HiFi-GAN vocoder. Setting σ = 0 recovers OT-CFM exactly, which is why the ablations below can vary the bridge on its own.</p>
     </div>
 
     <figure>
@@ -336,7 +336,7 @@
     <div class="head">
       <span class="eyebrow">§ V — Demo</span>
       <h2>Three clips per scene, one envelope per column</h2>
-      <p class="lede">Every clip is four seconds, monophonic, 22.05 kHz, decoded with the same official DCASE HiFi-GAN vocoder — no system gains a vocoder advantage. Within a column, all temporally conditioned systems were given the same RMS envelope, taken from the original recording in that column. PixelSNAIL and AudioLDM take no envelope.</p>
+      <p class="lede">Every clip is four seconds, monophonic, 22.05 kHz. Within a column, all temporally conditioned systems were given the same RMS envelope, taken from the original recording in that column; PixelSNAIL and AudioLDM take no envelope. Systems are compared as published rather than under a shared vocoder: SB-CFM, OT-CFM, and PixelSNAIL use the official DCASE HiFi-GAN vocoder, T-Foley and MambaFoley synthesize waveforms directly, and AudioLDM uses the vocoder shipped with its own pipeline.</p>
     </div>
 
     <div class="tabs" role="tablist" aria-label="Scene"></div>
@@ -398,7 +398,7 @@
           <tr><td>MambaFoley</td><td>7.63</td><td>1.62</td><td>0.964</td><td>2.93</td><td>0.295</td><td>0.0374</td></tr>
           <tr><td>AudioLDM</td><td>4.77</td><td>0.86</td><td>0.981</td><td>3.02</td><td>0.340</td><td>–</td></tr>
           <tr><td>OT-CFM (ours, σ=0)</td><td>2.90</td><td>0.61</td><td>0.983</td><td>3.18</td><td>0.339</td><td>0.0232</td></tr>
-          <tr class="best"><td>SB-CFM (ours)</td><td>2.57</td><td>0.49</td><td>0.991</td><td>3.26</td><td>0.346</td><td>0.0230</td></tr>
+          <tr class="best"><td>SB-CFM (ours)</td><td>2.58</td><td>0.50</td><td>0.991</td><td>3.26</td><td>0.346</td><td>0.0230</td></tr>
         </tbody>
       </table>
     </div>
@@ -448,7 +448,7 @@
             <tr><td>Mov. motor</td><td>19.60</td><td>19.24</td><td>13.61</td><td>7.21</td><td>6.80</td><td class="b">6.28</td></tr>
             <tr><td>Rain</td><td>13.15</td><td>5.31</td><td>6.72</td><td>6.27</td><td>2.65</td><td class="b">2.52</td></tr>
             <tr><td>Sneeze/cough</td><td>3.41</td><td>3.36</td><td>3.79</td><td>1.50</td><td>1.28</td><td class="b">1.05</td></tr>
-            <tr><td>Average</td><td>10.07</td><td>8.03</td><td>7.63</td><td>4.765</td><td>2.897</td><td class="b">2.572</td></tr>
+            <tr><td>Average</td><td>10.07</td><td>8.03</td><td>7.63</td><td>4.77</td><td>2.90</td><td class="b">2.58</td></tr>
           </tbody>
         </table>
       </div>
@@ -457,18 +457,18 @@
     <details>
       <summary><span class="sum-l"><span class="tag">Table 4</span> Bridge noise and sampler</span><span class="sign"></span></summary>
       <div class="det-body scroll">
-        <p class="mcap">Rows 1–2 isolate the training bridge: FAD improves, but KAD and CLAP degrade — the bridge alone is not sufficient. Rows 2–3 isolate the sampler at fixed training: KAD recovers to 0.498 and CLAP to 0.346, both overtaking the σ=0 baseline the bridge alone had fallen behind. <b>The two are complementary, not redundant.</b> Increasing σ beyond 0.05 is harmful.</p>
+        <p class="mcap">Rows 1–2 isolate the training bridge: FAD improves from 2.90 to 2.67 and ICD rises, but KAD degrades slightly (0.61 → 0.65) and CLAP more visibly (0.339 → 0.301) — the bridge alone is not sufficient. Rows 2–3 isolate the sampler at fixed training: FAD improves to 2.58, and KAD recovers to 0.50 and CLAP to 0.346, both overtaking the σ=0 baseline the bridge alone had fallen behind. <b>The two are complementary, not redundant.</b> Increasing σ beyond 0.05 is harmful: KAD rises monotonically (0.50 → 0.71).</p>
         <table class="mtable">
           <thead>
             <tr><th>σ</th><th>Sampler</th><th>FAD ↓</th><th>KAD ↓</th><th>Acc ↑</th><th>ICD</th><th>CLAP ↑</th></tr>
           </thead>
           <tbody>
-            <tr><td>0.00 (OT-CFM)</td><td>Determ.</td><td>2.90</td><td>0.610</td><td>0.983</td><td>3.180</td><td>0.339</td></tr>
-            <tr><td>0.05</td><td>Determ.</td><td>2.67</td><td>0.649</td><td>0.983</td><td>3.245</td><td>0.301</td></tr>
-            <tr class="best"><td>0.05</td><td>Stoch.</td><td>2.57</td><td>0.498</td><td>0.991</td><td>3.261</td><td>0.346</td></tr>
-            <tr><td>0.10</td><td>Stoch.</td><td>3.11</td><td>0.631</td><td>0.989</td><td>3.160</td><td>0.343</td></tr>
-            <tr><td>0.15</td><td>Stoch.</td><td>3.29</td><td>0.660</td><td>0.971</td><td>3.230</td><td>0.334</td></tr>
-            <tr><td>0.20</td><td>Stoch.</td><td>3.06</td><td>0.705</td><td>0.979</td><td>3.250</td><td>0.339</td></tr>
+            <tr><td>0 (OT-CFM)</td><td>Det.</td><td>2.90</td><td>0.61</td><td>0.983</td><td>3.18</td><td>0.339</td></tr>
+            <tr><td>0.05</td><td>Det.</td><td>2.67</td><td>0.65</td><td>0.983</td><td>3.25</td><td>0.301</td></tr>
+            <tr class="best"><td>0.05</td><td>Stoch.</td><td>2.58</td><td>0.50</td><td>0.991</td><td>3.26</td><td>0.346</td></tr>
+            <tr><td>0.10</td><td>Stoch.</td><td>3.11</td><td>0.63</td><td>0.989</td><td>3.16</td><td>0.343</td></tr>
+            <tr><td>0.15</td><td>Stoch.</td><td>3.29</td><td>0.66</td><td>0.971</td><td>3.23</td><td>0.334</td></tr>
+            <tr><td>0.20</td><td>Stoch.</td><td>3.06</td><td>0.71</td><td>0.979</td><td>3.25</td><td>0.339</td></tr>
           </tbody>
         </table>
       </div>
@@ -477,14 +477,14 @@
     <details>
       <summary><span class="sum-l"><span class="tag">Table 5</span> RMS temporal conditioning</span><span class="sign"></span></summary>
       <div class="det-body scroll">
-        <p class="mcap">Removing the envelope path is decisive: FAD more than doubles and KAD doubles. Without it the model retains the correct class but loses the temporal energy structure that distinguishes realizations within it. <b>Temporal conditioning is a central component, not an auxiliary refinement.</b></p>
+        <p class="mcap">Removing the envelope path is decisive: FAD more than doubles (2.58 → 6.27) and KAD doubles (0.50 → 1.05). Without it the model retains the correct class but loses the temporal energy structure that distinguishes realizations within it. <b>Temporal conditioning is a central component, not an auxiliary refinement.</b></p>
         <table class="mtable">
           <thead>
             <tr><th>Conditioning</th><th>FAD ↓</th><th>KAD ↓</th><th>Acc ↑</th><th>ICD ↑</th><th>CLAP ↑</th></tr>
           </thead>
           <tbody>
-            <tr><td>Class only</td><td>6.27</td><td>1.050</td><td>0.973</td><td>2.85</td><td>0.310</td></tr>
-            <tr class="best"><td>Class + RMS</td><td>2.57</td><td>0.498</td><td>0.991</td><td>3.26</td><td>0.346</td></tr>
+            <tr><td>Class only</td><td>6.27</td><td>1.05</td><td>0.973</td><td>2.85</td><td>0.310</td></tr>
+            <tr class="best"><td>Class + RMS</td><td>2.58</td><td>0.50</td><td>0.991</td><td>3.26</td><td>0.346</td></tr>
           </tbody>
         </table>
       </div>
@@ -493,7 +493,7 @@
     <details>
       <summary><span class="sum-l"><span class="tag">Table 6</span> Per-scene guidance scale</span><span class="sign"></span></summary>
       <div class="det-body scroll">
-        <p class="mcap">The selected scale varies strongly with category. Sparse transients benefit from strong guidance that sharpens class identity; the dense, texture-rich keyboard instead prefers weak guidance that preserves its fine variation. KAD is a whole-distribution metric and is reported only as an average (0.49).</p>
+        <p class="mcap">The selected scale varies strongly with category. Sparse transients benefit from strong guidance that sharpens class identity; the dense, texture-rich keyboard instead prefers weak guidance that preserves its fine variation. KAD is a whole-distribution metric and is reported only as an average (0.50).</p>
         <table class="mtable">
           <thead>
             <tr><th>Scene</th><th>CFG</th><th>FAD ↓</th><th>Acc ↑</th><th>ICD ↑</th><th>CLAP ↑</th></tr>
@@ -506,7 +506,7 @@
             <tr><td>Mov. motor</td><td>5.0</td><td>6.28</td><td>1.000</td><td>3.98</td><td>0.201</td></tr>
             <tr><td>Rain</td><td>1.5</td><td>2.52</td><td>0.990</td><td>3.50</td><td>0.393</td></tr>
             <tr><td>Sneeze/cough</td><td>5.0</td><td>1.05</td><td>0.977</td><td>1.97</td><td>0.363</td></tr>
-            <tr class="best"><td>Average</td><td>–</td><td>2.572</td><td>0.991</td><td>3.261</td><td>0.346</td></tr>
+            <tr class="best"><td>Average</td><td>–</td><td>2.58</td><td>0.991</td><td>3.26</td><td>0.346</td></tr>
           </tbody>
         </table>
       </div>
