@@ -8,14 +8,13 @@
 <meta name="description" content="Audio demo page for Scene-Conditioned Foley Sound Synthesis via Schrödinger Bridge Conditional Flow Matching. DCASE 2023 Task 7.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
   :root{
     /* Colour comes off the viridis ramp our mel-spectrograms are plotted in.
-       violet = ours, teal = interactive, and nothing else gets to be coloured. */
+       violet = ours, teal = interactive. Nothing else gets to be coloured. */
     --paper:#F4F3EF;
     --card:#FFFFFF;
-    --wash:#EDECE7;
     --ink:#17171B;
     --dim:#6A6A75;
     --faint:#9A9AA4;
@@ -25,8 +24,6 @@
     --violet-lo:#7A3E8C;
     --violet-wash:rgba(68,1,84,.055);
     --teal:#1B7F7A;
-    --teal-lo:#21918C;
-    --lime:#5EC962;
     --yellow:#FDE725;
     --wrap:1080px;
   }
@@ -46,13 +43,9 @@
 
   h1,h2,h3{font-family:"Outfit",system-ui,sans-serif;letter-spacing:-.015em;margin:0}
   h1{font-size:clamp(2rem,4.1vw,3.05rem);font-weight:600;line-height:1.14}
-  h1 .hl{
-    color:var(--violet);
-    background:linear-gradient(transparent 62%, rgba(253,231,37,.55) 62%);
-  }
+  h1 .hl{color:var(--violet);background:linear-gradient(transparent 62%, rgba(253,231,37,.55) 62%)}
   h2{font-size:clamp(1.5rem,2.5vw,2.05rem);font-weight:600;line-height:1.2}
-  h3{font-size:1rem;font-weight:600;margin-bottom:6px}
-  .mono{font-family:"JetBrains Mono",ui-monospace,monospace}
+  h3{font-size:.98rem;font-weight:600;margin-bottom:5px}
 
   /* ---------- sticky bar ---------- */
   nav.bar{
@@ -64,7 +57,7 @@
     max-width:var(--wrap);margin:0 auto;padding:0 30px;height:50px;
     display:flex;align-items:center;justify-content:space-between;gap:20px;
   }
-  .bar-name{font-family:"Outfit",sans-serif;font-weight:700;font-size:.95rem;letter-spacing:-.01em;white-space:nowrap}
+  .bar-name{font-family:"Outfit",sans-serif;font-weight:700;font-size:.95rem;white-space:nowrap}
   .bar-name span{color:var(--violet)}
   .bar-links{display:flex;gap:20px;overflow-x:auto;scrollbar-width:none}
   .bar-links::-webkit-scrollbar{display:none}
@@ -74,7 +67,7 @@
   }
   .bar-links a:hover{color:var(--ink)}
 
-  /* ---------- hero (centred, like the reference) ---------- */
+  /* ---------- hero ---------- */
   header{padding:60px 0 0;text-align:center}
   .kicker{
     display:inline-flex;align-items:center;gap:10px;
@@ -89,36 +82,42 @@
   .byline{font-family:"Outfit",sans-serif;font-weight:500;font-size:1.16rem;margin:0 0 3px}
   .affil{color:var(--dim);font-size:.9rem;margin:0 0 26px}
 
-  .pills{display:flex;justify-content:center;flex-wrap:wrap;gap:9px;margin-bottom:44px}
+  .pills{display:flex;justify-content:center;flex-wrap:wrap;gap:9px;margin-bottom:40px}
   .pill{
     display:inline-flex;align-items:center;gap:8px;
     font-family:"Outfit",sans-serif;font-weight:500;font-size:.85rem;
     padding:9px 20px;border-radius:999px;
     background:var(--ink);color:#fff;border:1px solid var(--ink);
-    transition:background .16s,border-color .16s,color .16s;
+    transition:background .16s,border-color .16s;
   }
   .pill:hover{background:var(--violet);border-color:var(--violet);color:#fff}
   .pill.solid{background:var(--violet);border-color:var(--violet)}
   .pill.solid:hover{background:var(--teal);border-color:var(--teal)}
   .pill svg{width:14px;height:14px;fill:currentColor}
 
-  /* ---------- hero media: figure + bridge, side by side ---------- */
-  .media{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:38px}
-  .frame{
+  /* ---------- figures ---------- */
+  figure{margin:0}
+  figure img{
+    width:100%;display:block;background:var(--card);
+    border:1px solid var(--rule);border-radius:8px;padding:12px;
+  }
+  figcaption{font-size:.83rem;line-height:1.7;color:var(--dim);margin-top:12px;text-align:left}
+  figcaption b{color:var(--ink);font-weight:600}
+  /* ---------- hero band: the OT-coupled Brownian bridge ---------- */
+  .band{
     background:var(--card);border:1px solid var(--rule);border-radius:8px;
-    overflow:hidden;display:flex;flex-direction:column;
+    overflow:hidden;margin-bottom:38px;
   }
-  .frame img{width:100%;height:100%;object-fit:contain;display:block;padding:10px}
-  .frame canvas{width:100%;height:100%;min-height:230px;display:block}
-  .frame .cap{
-    font-family:"JetBrains Mono",monospace;font-size:.62rem;color:var(--faint);
-    padding:8px 12px;border-top:1px solid var(--rule-lo);display:flex;
-    justify-content:space-between;gap:10px;text-align:left;
+  .band canvas{width:100%;height:220px;display:block}
+  .band-cap{
+    display:flex;justify-content:space-between;gap:14px;
+    font-family:"JetBrains Mono",monospace;font-size:.64rem;color:var(--faint);
+    padding:9px 16px;border-top:1px solid var(--rule-lo);text-align:left;
   }
-  .frame .cap b{color:var(--dim);font-weight:400}
+  .band-cap .mid{color:var(--violet-lo)}
 
   .tldr{
-    text-align:left;max-width:92ch;margin:0 auto;padding:0 0 34px;
+    text-align:left;max-width:92ch;margin:0 auto;padding:0 0 32px;
     font-size:1.02rem;color:var(--dim);
   }
   .tldr b.k{
@@ -132,7 +131,7 @@
     display:flex;justify-content:center;align-items:center;flex-wrap:wrap;gap:18px;
     padding:24px 0 0;border-top:1px solid var(--rule);
   }
-  .shortcuts .lab{font-family:"Plus Jakarta Sans",sans-serif;font-style:italic;color:var(--faint);font-size:.9rem}
+  .shortcuts .lab{font-style:italic;color:var(--faint);font-size:.9rem}
   .shortcuts a{
     font-family:"Outfit",sans-serif;font-weight:500;font-size:.93rem;color:var(--ink);
     border-bottom:1.5px solid var(--rule);padding-bottom:2px;
@@ -141,35 +140,22 @@
 
   /* ---------- sections ---------- */
   section{padding:70px 0;border-top:1px solid var(--rule)}
-  section:first-of-type{border-top:0}
-  .head{margin-bottom:34px}
+  .head{margin-bottom:32px}
   .eyebrow{
     font-family:"JetBrains Mono",monospace;font-size:.66rem;letter-spacing:.18em;
     text-transform:uppercase;color:var(--teal);display:block;margin-bottom:9px;
   }
   .lede{color:var(--dim);max-width:72ch;margin-top:12px;font-size:1rem}
 
-  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:40px}
-  .cards{display:grid;gap:12px}
-  .card{
-    background:var(--card);border:1px solid var(--rule);border-radius:8px;padding:20px 22px;
-  }
-  .card .n{
-    font-family:"JetBrains Mono",monospace;font-size:.62rem;letter-spacing:.14em;
-    text-transform:uppercase;color:var(--faint);display:block;margin-bottom:8px;
-  }
-  .card .n b{color:var(--violet-lo);font-weight:500}
-  .card p{font-size:.92rem;color:var(--dim);margin:0}
-  .card p strong{color:var(--ink);font-weight:600}
-  .card p em{font-style:italic}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
 
-  figure{margin:0}
-  figure img{width:100%;display:block;border:1px solid var(--rule);border-radius:8px;background:var(--card)}
-  figcaption{font-size:.82rem;line-height:1.7;color:var(--dim);margin-top:11px}
-  figcaption b{color:var(--ink);font-weight:600}
+  .prose{max-width:84ch;margin-bottom:38px}
+  .prose p{font-size:1.05rem;line-height:1.8;color:var(--dim);margin:0}
+  .prose strong{color:var(--ink);font-weight:600}
+  .prose em{font-style:italic;color:var(--violet);font-weight:500}
 
   /* ---------- nesting strip ---------- */
-  .nest{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:34px}
+  .nest{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:32px}
   .nest > div{background:var(--card);border:1px solid var(--rule);border-radius:8px;padding:18px 20px}
   .nest .k{font-family:"Outfit",sans-serif;font-weight:600;font-size:1.15rem;letter-spacing:-.02em}
   .nest .v{font-family:"JetBrains Mono",monospace;font-size:.64rem;color:var(--faint);margin-top:5px}
@@ -243,24 +229,19 @@
     padding:20px 22px;font-family:"JetBrains Mono",monospace;font-size:.72rem;
     line-height:1.85;color:var(--dim);white-space:pre;overflow-x:auto;margin:0 0 28px;
   }
-  .limit{
-    border-left:3px solid var(--teal);padding:2px 0 2px 18px;color:var(--dim);
-    font-size:.94rem;max-width:78ch;
-  }
+  .limit{border-left:3px solid var(--teal);padding:2px 0 2px 18px;color:var(--dim);font-size:.94rem;max-width:78ch}
   footer{padding:44px 0 80px;border-top:1px solid var(--rule)}
   footer p{color:var(--faint);font-size:.84rem;margin:0}
 
   @media (max-width:900px){
-    .media,.grid2,.nest{grid-template-columns:1fr}
+    .grid2,.nest{grid-template-columns:1fr}
+    .band canvas{height:150px}
     header h1{max-width:none}
     .atable th.sys{width:112px}
     .atable th,.atable td{padding:9px 6px}
     .bar-name{display:none}
   }
-  @media (prefers-reduced-motion:reduce){
-    html{scroll-behavior:auto}
-    *{animation:none!important;transition:none!important}
-  }
+  @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{transition:none!important}}
 </style>
 </head>
 <body>
@@ -297,14 +278,12 @@
       </a>
     </div>
 
-    <div class="media">
-      <div class="frame">
-        <img src="assets/pipeline.png" alt="Overview of the SB-CFM pipeline. A target log-mel spectrogram and a Gaussian source are coupled by optimal transport, mixed along a Schrödinger-bridge path, and regressed by a conditional velocity U-Net. At inference an Euler-Maruyama sampler with classifier-free guidance produces a mel spectrogram that HiFi-GAN renders to a waveform.">
-        <div class="cap"><b>Fig. 1</b><span>Training and generation pipeline</span></div>
-      </div>
-      <div class="frame">
-        <canvas id="bridge" aria-label="Animated illustration of the optimal-transport-coupled Brownian bridge. Trajectories leave a Gaussian source, spread apart through the middle of the path, and collapse exactly onto their targets."></canvas>
-        <div class="cap"><b>x₀ ~ N(0, I) &nbsp;→&nbsp; x₁ ~ p_data</b><span>σ_t = σ√(2t(1−t)), σ = 0.05</span></div>
+    <div class="band">
+      <canvas id="bridge" aria-label="Animated illustration of the optimal-transport-coupled Brownian bridge. Trajectories leave a Gaussian source, spread apart through the middle of the path, and collapse exactly onto their targets."></canvas>
+      <div class="band-cap">
+        <span>t = 0 &nbsp;·&nbsp; x₀ ~ N(0, I)</span>
+        <span class="mid">σ_t = σ√(2t(1−t)), &nbsp;σ = 0.05</span>
+        <span>x₁ ~ p_data &nbsp;·&nbsp; t = 1</span>
       </div>
     </div>
 
@@ -333,7 +312,7 @@
       <span class="eyebrow">Abstract</span>
       <h2>Seven labels, 5.4 hours, and many right answers</h2>
     </div>
-    <div class="grid2">
+    <div class="grid2" style="gap:40px">
       <div>
         <p>Foley sound synthesis, as framed by the DCASE 2023 Task 7 benchmark, asks a system to generate a four-second clip from one of seven scene categories. It is inherently one-to-many: each category admits many acoustically valid realizations, while only a few hours of labeled audio exist to learn them from. Existing systems rely on discrete autoregressive priors or iterative diffusion denoising, and both can be suboptimal here — preserving sample diversity while holding scene fidelity is the central difficulty.</p>
         <p>We propose a mel-domain framework based on Schrödinger Bridge Conditional Flow Matching. Rather than reversing a denoising process, SB-CFM directly learns a velocity field along an optimal-transport-coupled Brownian-bridge path whose time-dependent noise preserves trajectory diversity.</p>
@@ -371,51 +350,16 @@
     <div class="head">
       <span class="eyebrow">§ III — Proposed method</span>
       <h2>A stochastic bridge in the mel domain, steered by an envelope</h2>
-      <p class="lede">Four decisions carry the result. Each is separable, and the ablations below vary them one at a time.</p>
     </div>
 
-    <div class="grid2" style="margin-bottom:40px">
-      <div class="cards">
-        <div class="card">
-          <span class="n"><b>01</b> — Probability path</span>
-          <h3>Schrödinger bridge, not a denoising chain</h3>
-          <p>We interpolate linearly between a standard-Gaussian source and a target log-mel spectrogram, then add a Brownian-bridge perturbation whose variance vanishes at both endpoints and peaks at t = ½. The marginals stay matched exactly while the interior of every path is randomized, so <strong>a single label can still fan out into many valid sounds</strong>. The network regresses the closed-form velocity: training is simulation-free mean-squared regression, with no score to estimate.</p>
-        </div>
-        <div class="card">
-          <span class="n"><b>02</b> — Coupling</span>
-          <h3>Intra-class optimal transport</h3>
-          <p>Each mini-batch is coupled with an exact Hungarian assignment, restricted to run within each scene class so class identity is preserved and the O(B³) solve breaks into per-class blocks. Short, non-crossing paths keep the learned velocity field close to straight, which is what buys the low step count.</p>
-        </div>
-        <div class="card">
-          <span class="n"><b>03</b> — Conditioning</span>
-          <h3>RMS envelope as a first-class signal</h3>
-          <p>Scene identity enters every residual block through zero-initialized adaptive group normalization. The RMS envelope enters separately: block-wise FiLM in the decoder pools it into 32 blocks and predicts a per-block scale and shift, and a zero-init 1-D convolution adds channel-wise modulation in the encoder. This gives explicit control over <em>when</em> energy appears — and <strong>removing it is the single most damaging ablation</strong>.</p>
-        </div>
-        <div class="card">
-          <span class="n"><b>04</b> — Sampling</span>
-          <h3>Stochastic Euler update, per-scene guidance</h3>
-          <p>The deterministic Euler step is perturbed with isotropic noise scaled to the training bridge (σ_stoch = ησ√2, η = 0.25), with no noise on the final step so the terminal marginal is unperturbed. Classifier-free guidance trades diversity against fidelity, at a scale chosen per scene. Both samplers cost the same two network passes per step.</p>
-        </div>
-      </div>
-
-      <div class="cards" style="align-content:start">
-        <div class="card">
-          <span class="n">Velocity network</span>
-          <h3>2-D U-Net over log-mel</h3>
-          <p>80 mel bands × 345 frames from four seconds at 22.05 kHz. Base width 64, multipliers [1, 2, 4, 4], three residual blocks per level, 2-D self-attention at the two deepest levels and the bottleneck. The output convolution is zero-initialized, so the flow initially leaves x₀ unchanged.</p>
-        </div>
-        <div class="card">
-          <span class="n">Training</span>
-          <h3>1000 epochs, one uninterrupted run</h3>
-          <p>AdamW (lr 1.4e−4, weight decay 1e−6), cosine schedule with 1000 warmup steps, dropout 0.15, EMA 0.999, bf16, global batch 48 on two GPUs, class-balanced batches. Label dropout p = 0.15 for guidance; the RMS envelope is never dropped. Per-class weights up-weight gunshot (3), sneeze/cough (2), and moving motor vehicle (1.5).</p>
-        </div>
-        <div class="card">
-          <span class="n">Inference</span>
-          <h3>50 steps, one shared vocoder</h3>
-          <p>Generation uses the stochastic sampler with 50 steps. Every generated mel spectrogram is de-normalized and converted by the official DCASE HiFi-GAN vocoder — <strong>every system, baselines included, uses this same vocoder</strong>. We synthesize 100 clips per class, each conditioned on the RMS envelope of the correspondingly indexed evaluation clip.</p>
-        </div>
-      </div>
+    <div class="prose">
+      <p>We generate in the log-mel domain. A standard-Gaussian source is coupled to a target spectrogram by an exact intra-class optimal-transport assignment, and the two are joined by a <strong>Schrödinger-bridge path</strong>: a straight line plus a Brownian-bridge perturbation whose variance vanishes at both endpoints and peaks at t = ½, so the marginals match exactly while every path interior stays randomized. A 2-D U-Net regresses the closed-form velocity — scene identity enters through zero-initialized adaptive group normalization, and the frame-level <strong>RMS envelope</strong> enters through block-wise FiLM, which is what controls <em>when</em> energy appears. At inference a 50-step Euler update, perturbed with noise scaled to the training bridge and guided per scene, is decoded by the official DCASE HiFi-GAN vocoder — the same one every baseline uses. Setting σ = 0 recovers OT-CFM exactly, which is why the ablations below can vary the bridge on its own.</p>
     </div>
+
+    <figure>
+      <img src="assets/pipeline.png" alt="Overview of the SB-CFM pipeline. A target log-mel spectrogram and a Gaussian source are coupled by optimal transport, mixed along a Schrödinger-bridge path, and regressed by a conditional velocity U-Net. At inference an Euler-Maruyama sampler with classifier-free guidance produces a mel spectrogram that HiFi-GAN renders to a waveform.">
+      <figcaption><b>Fig. 1</b> — Training (top): a target log-mel spectrogram x₁ and a Gaussian source x₀ are coupled within class, mixed along the Schrödinger-bridge path, and the U-Net regresses the closed-form velocity. Generation (bottom): a 50-step Euler-Maruyama sampler with classifier-free guidance, decoded by the official DCASE HiFi-GAN vocoder.</figcaption>
+    </figure>
   </div>
 </section>
 
@@ -522,10 +466,7 @@
     </div>
 
     <details open>
-      <summary>
-        <span class="sum-l"><span class="tag">Table 2</span> Per-scene FAD</span>
-        <span class="sign"></span>
-      </summary>
+      <summary><span class="sum-l"><span class="tag">Table 2</span> Per-scene FAD</span><span class="sign"></span></summary>
       <div class="det-body scroll">
         <p class="mcap">SB-CFM outperforms every prior baseline in all seven categories. Among all configurations it ranks first in six; its own σ=0 ablation edges it on gunshot by 0.01, a negligible difference. The largest gains occur in structured or transient categories. Moving motor vehicle is the principal remaining headroom.</p>
         <table class="mtable">
@@ -547,10 +488,7 @@
     </details>
 
     <details>
-      <summary>
-        <span class="sum-l"><span class="tag">Table 4</span> Bridge noise and sampler</span>
-        <span class="sign"></span>
-      </summary>
+      <summary><span class="sum-l"><span class="tag">Table 4</span> Bridge noise and sampler</span><span class="sign"></span></summary>
       <div class="det-body scroll">
         <p class="mcap">Rows 1–2 isolate the training bridge: FAD improves, but KAD and CLAP degrade — the bridge alone is not sufficient. Rows 2–3 isolate the sampler at fixed training: KAD recovers to 0.498 and CLAP to 0.346, both overtaking the σ=0 baseline the bridge alone had fallen behind. <b>The two are complementary, not redundant.</b> Increasing σ beyond 0.05 is harmful.</p>
         <table class="mtable">
@@ -570,10 +508,7 @@
     </details>
 
     <details>
-      <summary>
-        <span class="sum-l"><span class="tag">Table 5</span> RMS temporal conditioning</span>
-        <span class="sign"></span>
-      </summary>
+      <summary><span class="sum-l"><span class="tag">Table 5</span> RMS temporal conditioning</span><span class="sign"></span></summary>
       <div class="det-body scroll">
         <p class="mcap">Removing the envelope path is decisive: FAD more than doubles and KAD doubles. Without it the model retains the correct class but loses the temporal energy structure that distinguishes realizations within it. <b>Temporal conditioning is a central component, not an auxiliary refinement.</b></p>
         <table class="mtable">
@@ -589,10 +524,7 @@
     </details>
 
     <details>
-      <summary>
-        <span class="sum-l"><span class="tag">Table 6</span> Per-scene guidance scale</span>
-        <span class="sign"></span>
-      </summary>
+      <summary><span class="sum-l"><span class="tag">Table 6</span> Per-scene guidance scale</span><span class="sign"></span></summary>
       <div class="det-body scroll">
         <p class="mcap">The selected scale varies strongly with category. Sparse transients benefit from strong guidance that sharpens class identity; the dense, texture-rich keyboard instead prefers weak guidance that preserves its fine variation. KAD is a whole-distribution metric and is reported only as an average (0.49).</p>
         <table class="mtable">
@@ -693,7 +625,7 @@ SCENES.forEach((scene, i) => {
 });
 render(SCENES[0].key);
 
-/* ---- the OT-coupled Brownian bridge, drawn in the viridis ramp ---- */
+/* ---- hero band: the OT-coupled Brownian bridge, drawn in the viridis ramp ---- */
 (function () {
   const c = document.getElementById("bridge");
   const ctx = c.getContext("2d");
@@ -720,14 +652,14 @@ render(SCENES[0].key);
         const dev = (w - w * t) * Math.sqrt(2 * t * (1 - t)) * 0.05;
         pts.push([t, (1 - t) * y0 + t * y1 + dev]);
       }
-      pts[STEPS][1] = y1;
+      pts[STEPS][1] = y1;                                    // pin the endpoint exactly
       return pts;
     });
   }
 
   function draw(now) {
     const W = c.clientWidth, H = c.clientHeight;
-    const padX = 14, padY = 18;
+    const padX = 22, padY = 20;
     const X = t => padX + t * (W - padX * 2);
     const Y = v => H / 2 + v * (H / 2 - padY) / 1.6;
     const prog = reduced ? 1 : Math.min(1, ((now - t0) / 3000) % 1.4);
@@ -751,13 +683,13 @@ render(SCENES[0].key);
       const last = Math.floor(prog * STEPS);
       ctx.beginPath();
       for (let s = 0; s <= last; s++) ctx.lineTo(X(pts[s][0]), Y(pts[s][1]));
-      ctx.strokeStyle = mid ? "rgba(68,1,84,.95)" : "rgba(27,127,122,.34)";
+      ctx.strokeStyle = mid ? "rgba(68,1,84,.95)" : "rgba(27,127,122,.32)";
       ctx.lineWidth = mid ? 1.7 : 1;
       ctx.stroke();
       if (last > 0 && last < STEPS) {
         ctx.beginPath();
         ctx.arc(X(pts[last][0]), Y(pts[last][1]), mid ? 2.8 : 1.8, 0, 6.284);
-        ctx.fillStyle = mid ? "#440154" : "rgba(27,127,122,.6)";
+        ctx.fillStyle = mid ? "#440154" : "rgba(27,127,122,.55)";
         ctx.fill();
       }
     });
