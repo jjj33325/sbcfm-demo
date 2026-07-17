@@ -74,7 +74,7 @@ audio/                      4 s, 22.05 kHz, decoded with the official DCASE HiFi
 ```
 
 Each system folder holds three clips per scene, named `<scene>_1`, `<scene>_2`, `<scene>_3`, where
-`<scene>` is one of `dog_bark`, `footstep`, `gunshot`, `keyboard`, `moving_motor`, `rain`,
+`<scene>` is one of `dog_bark`, `footstep`, `gunshot`, `keyboard`, `moving_motor_vehicle`, `rain`,
 `sneeze_cough`.
 
 Within a column, every temporally conditioned system was given the same RMS envelope, taken from
