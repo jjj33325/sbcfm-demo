@@ -148,8 +148,8 @@
   .atable td.sys small{display:block;color:var(--muted);font-family:"IBM Plex Mono",monospace;font-size:.68rem}
   .atable tr.ours td{background:rgba(253,231,37,.045)}
   .atable tr.ours td.sys{border-left:2px solid var(--yellow);font-weight:600}
-  .atable tr.gt td{background:rgba(255,255,255,.025)}
-  .atable tr.gt td.sys{border-left:2px solid var(--muted)}
+  .atable tr.orig td{background:rgba(255,255,255,.025)}
+  .atable tr.orig td.sys{border-left:2px solid var(--muted)}
   audio{width:100%;height:36px;display:block}
   audio::-webkit-media-controls-panel{background:var(--panel-2)}
 
@@ -201,8 +201,8 @@
         <p class="affil">Department of Computer Engineering, Chosun University, Gwangju, Republic of Korea</p>
         <div class="badges">
           <a class="badge primary" href="#samples">Listen to samples</a>
-          <a class="badge" href="paper.pdf">Paper (PDF)</a>
-          <a class="badge" href="https://github.com/jjj33325">Code</a>
+          <a class="badge" href="#method">Method</a>
+          <a class="badge" href="https://github.com/jjj33325/sbcfm-demo">Code</a>
         </div>
       </div>
 
@@ -271,7 +271,7 @@
       </div>
 
       <figure>
-        <img src="assets/fig1_pipeline.png" alt="Overview of the SB-CFM pipeline: a target log-mel spectrogram and a Gaussian source are coupled by optimal transport, mixed along a Schrödinger-bridge path, and regressed by a conditional velocity U-Net; at inference an Euler-Maruyama sampler with classifier-free guidance produces a mel spectrogram that HiFi-GAN renders to a waveform.">
+        <img src="assets/pipeline.png" alt="Overview of the SB-CFM pipeline: a target log-mel spectrogram and a Gaussian source are coupled by optimal transport, mixed along a Schrödinger-bridge path, and regressed by a conditional velocity U-Net; at inference an Euler-Maruyama sampler with classifier-free guidance produces a mel spectrogram that HiFi-GAN renders to a waveform.">
         <figcaption>Fig. 1 — Training (top): a target log-mel spectrogram x₁ and a Gaussian source x₀ are coupled within class, mixed along the Schrödinger-bridge path, and the U-Net regresses the closed-form velocity. Generation (bottom): a 50-step Euler-Maruyama sampler with classifier-free guidance, decoded by the official DCASE HiFi-GAN vocoder.</figcaption>
       </figure>
     </div>
@@ -297,7 +297,7 @@
     <div class="sec-head">
       <p class="eyebrow">Audio samples</p>
       <h2>Three clips per scene, same envelope across every system</h2>
-      <p class="lede">Every clip is four seconds, monophonic, 22.05 kHz, and decoded with the same official DCASE HiFi-GAN vocoder — no system gains a vocoder advantage. Within a column, all temporally conditioned systems were given the same RMS envelope, taken from the ground-truth clip in that column.</p>
+      <p class="lede">Every clip is four seconds, monophonic, 22.05 kHz, and decoded with the same official DCASE HiFi-GAN vocoder — no system gains a vocoder advantage. Within a column, all temporally conditioned systems were given the same RMS envelope, taken from the original recording in that column.</p>
     </div>
 
     <div class="tabs" role="tablist" aria-label="Scene"></div>
@@ -322,25 +322,19 @@
   <div class="wrap">
     <div class="sec-head">
       <p class="eyebrow">What you hear, seen</p>
-      <h2>Mel spectrograms and envelope tracking</h2>
-      <p class="lede">The differences that the metrics report are visible: baselines smear the sharp attacks that define gunshot and footstep, while our transport paths keep onsets and harmonic structure intact.</p>
+      <h2>Mel spectrograms, and the envelope they were asked to follow</h2>
+      <p class="lede">The differences the metrics report are visible. Baselines smear the sharp attacks that define gunshot and footstep; our transport paths keep onsets and harmonic structure intact. Moving motor vehicle is the hardest category for every system, and the row shows it.</p>
     </div>
 
     <figure style="margin-bottom:44px">
-      <img src="assets/fig2_spectrograms.png" alt="Mel-spectrogram comparison across the seven Foley categories, with one row per system: ground truth, PixelSNAIL, MambaFoley, T-Foley, AudioLDM, OT-CFM, and SB-CFM.">
-      <figcaption>Fig. 2 — Mel-spectrogram comparison across the seven categories. Rows, top to bottom: ground-truth recording, PixelSNAIL, MambaFoley, T-Foley, AudioLDM, OT-CFM (ours, σ=0), SB-CFM (ours).</figcaption>
+      <img src="assets/spectrograms.png" alt="Mel-spectrogram comparison across the seven Foley categories, with one row per system: the original recording, PixelSNAIL, MambaFoley, T-Foley, AudioLDM, OT-CFM, and SB-CFM.">
+      <figcaption>Fig. 2 — Mel-spectrogram comparison across the seven categories. Rows, top to bottom: original recording, PixelSNAIL, MambaFoley, T-Foley, AudioLDM, OT-CFM (ours, σ=0), SB-CFM (ours).</figcaption>
     </figure>
 
-    <div class="cols">
-      <figure>
-        <img src="assets/fig3_envelope.png" alt="Per-scene plots overlaying the RMS envelope of SB-CFM output on the conditioning target envelope.">
-        <figcaption>Fig. 3 — Temporal controllability. The RMS envelope of the generated audio (dashed) overlaid on the conditioning target (solid), one representative clip per scene. Mean E-L1 0.023, against T-Foley 0.034 and MambaFoley 0.037.</figcaption>
-      </figure>
-      <figure>
-        <img src="assets/fig4_ablation.png" alt="Ablation summary: FAD versus sampling steps for both samplers, intra-class diversity versus steps, and a sweep over the training bridge scale.">
-        <figcaption>Fig. 4 — (a) FAD vs. sampling steps for the deterministic Euler update and the proposed stochastic sampler; the gap is largest at low step counts. (b) Intra-class diversity vs. steps. (c) Sweep over the training bridge scale σ, with the optimum at 0.05.</figcaption>
-      </figure>
-    </div>
+    <figure>
+      <img src="assets/envelope.png" alt="Per-scene plots overlaying the RMS envelope of SB-CFM output on the conditioning target envelope, for one representative clip per scene.">
+      <figcaption>Fig. 3 — Temporal controllability. The RMS envelope of the generated audio (dashed) overlaid on the conditioning target (solid), one representative clip per scene. Mean E-L1 0.023, against T-Foley 0.034 and MambaFoley 0.037: a mel-domain flow follows the requested energy profile at least as closely as the waveform systems the mechanism is borrowed from.</figcaption>
+    </figure>
   </div>
 </section>
 
@@ -378,7 +372,7 @@
             <tr><th>Model</th><th>PQ ↑</th><th>CU ↑</th><th>CE ↑</th><th>PC</th></tr>
           </thead>
           <tbody>
-            <tr class="ref"><td>Ground truth (eval)</td><td>6.70</td><td>6.14</td><td>3.40</td><td>2.29</td></tr>
+            <tr class="ref"><td>Original (eval)</td><td>6.70</td><td>6.14</td><td>3.40</td><td>2.29</td></tr>
             <tr><td>PixelSNAIL</td><td>5.99</td><td>5.27</td><td>2.93</td><td>2.37</td></tr>
             <tr><td>T-Foley</td><td>6.36</td><td>5.79</td><td>3.13</td><td>2.12</td></tr>
             <tr><td>MambaFoley</td><td>6.38</td><td>5.79</td><td>3.13</td><td>2.11</td></tr>
@@ -492,7 +486,7 @@ const SCENES = [
 ];
 
 const SYSTEMS = [
-  { key: "gt",         label: "Ground truth",        note: "DCASE 2023 eval split", cls: "gt" },
+  { key: "original",   label: "Original",            note: "DCASE 2023 eval split", cls: "orig" },
   { key: "pixelsnail", label: "PixelSNAIL",          note: "official baseline [1]" },
   { key: "tfoley",     label: "T-Foley",             note: "waveform diffusion [4]" },
   { key: "mambafoley", label: "MambaFoley",          note: "SSM diffusion [5]" },
