@@ -60,12 +60,11 @@ their published defaults.
 ```
 index.html                  the demo page
 assets/                     figures
-  fig1_pipeline.png
-  fig2_spectrograms.png
-  fig3_envelope.png
-  fig4_ablation.png
+  pipeline.png              Fig. 1 — training and generation pipeline
+  spectrograms.png          Fig. 2 — mel-spectrogram comparison, all systems x all scenes
+  envelope.png              Fig. 3 — generated vs. conditioning RMS envelope, per scene
 audio/                      4 s, 22.05 kHz, decoded with the official DCASE HiFi-GAN vocoder
-  gt/                       ground truth, DCASE 2023 eval split
+  original/                 original recording, DCASE 2023 eval split
   pixelsnail/
   tfoley/
   mambafoley/
@@ -79,7 +78,7 @@ Each system folder holds three clips per scene, named `<scene>_1`, `<scene>_2`, 
 `sneeze_cough`.
 
 Within a column, every temporally conditioned system was given the same RMS envelope, taken from
-the ground-truth clip in that column.
+the original recording in that column.
 
 ## Editing the page
 
