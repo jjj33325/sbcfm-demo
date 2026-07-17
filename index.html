@@ -1,0 +1,634 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SB-CFM — Scene-Conditioned Foley Sound Synthesis via Schrödinger Bridge Conditional Flow Matching</title>
+<meta name="description" content="Audio demo page for Scene-Conditioned Foley Sound Synthesis via Schrödinger Bridge Conditional Flow Matching (DCASE 2023 Task 7).">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    /* palette derived from the viridis colormap used by our mel-spectrograms */
+    --ink:#0E0B16;
+    --panel:#171227;
+    --panel-2:#1E1833;
+    --line:#2E2650;
+    --text:#E8E5F2;
+    --muted:#9B93B8;
+    --violet:#440154;
+    --teal:#21918C;
+    --teal-lo:#2FB2AC;
+    --yellow:#FDE725;
+    --radius:10px;
+    --maxw:1120px;
+    --fs-display:clamp(2.1rem,4.4vw,3.4rem);
+  }
+
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    margin:0;
+    background:var(--ink);
+    color:var(--text);
+    font-family:"IBM Plex Sans",system-ui,sans-serif;
+    font-size:16px;
+    line-height:1.62;
+    -webkit-font-smoothing:antialiased;
+  }
+  a{color:var(--teal-lo);text-decoration:none;border-bottom:1px solid rgba(47,178,172,.35)}
+  a:hover{border-bottom-color:var(--teal-lo)}
+  :focus-visible{outline:2px solid var(--yellow);outline-offset:3px;border-radius:3px}
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 24px}
+
+  /* ---------- type ---------- */
+  h1,h2,h3{font-family:"Syne",sans-serif;letter-spacing:-.015em;margin:0}
+  h1{font-size:var(--fs-display);font-weight:800;line-height:1.08}
+  h2{font-size:clamp(1.35rem,2.2vw,1.75rem);font-weight:700}
+  h3{font-size:1.02rem;font-weight:600}
+  .eyebrow{
+    font-family:"IBM Plex Mono",monospace;font-size:.72rem;font-weight:500;
+    letter-spacing:.16em;text-transform:uppercase;color:var(--teal-lo);
+  }
+  .mono{font-family:"IBM Plex Mono",monospace}
+  p{margin:0 0 1em}
+
+  /* ---------- hero ---------- */
+  header.hero{
+    border-bottom:1px solid var(--line);
+    background:radial-gradient(1100px 420px at 78% -10%, rgba(68,1,84,.55), transparent 65%);
+    padding:56px 0 0;
+  }
+  .hero-grid{display:grid;grid-template-columns:1.15fr .85fr;gap:48px;align-items:center}
+  h1 .em{
+    background:linear-gradient(92deg,var(--teal-lo),var(--yellow));
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+  }
+  .authors{margin:20px 0 4px;font-size:1rem}
+  .affil{color:var(--muted);font-size:.9rem;margin:0 0 22px}
+  .badges{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:8px}
+  .badge{
+    display:inline-flex;align-items:center;gap:8px;
+    font-family:"IBM Plex Mono",monospace;font-size:.78rem;
+    padding:8px 14px;border:1px solid var(--line);border-radius:999px;
+    background:var(--panel);color:var(--text);border-bottom:1px solid var(--line);
+  }
+  .badge:hover{border-color:var(--teal);background:var(--panel-2)}
+  .badge.primary{background:var(--yellow);color:#161022;border-color:var(--yellow);font-weight:600}
+  .badge.primary:hover{background:#fff06a;border-color:#fff06a}
+
+  /* ---------- signature: brownian bridge canvas ---------- */
+  .bridge{
+    border:1px solid var(--line);border-radius:var(--radius);
+    background:linear-gradient(180deg,var(--panel),#130F22);padding:14px 14px 10px;
+  }
+  .bridge canvas{width:100%;height:210px;display:block}
+  .bridge-cap{
+    display:flex;justify-content:space-between;align-items:center;
+    font-family:"IBM Plex Mono",monospace;font-size:.7rem;color:var(--muted);
+    padding-top:8px;margin-top:8px;border-top:1px solid var(--line);
+  }
+  .nest{
+    display:flex;gap:0;margin:34px 0 0;border-top:1px solid var(--line);
+  }
+  .nest div{
+    flex:1;padding:16px 0 20px;border-right:1px solid var(--line);
+  }
+  .nest div:last-child{border-right:0}
+  .nest .k{font-family:"Syne",sans-serif;font-weight:700;font-size:1rem}
+  .nest .v{font-family:"IBM Plex Mono",monospace;font-size:.74rem;color:var(--muted);margin-top:3px}
+  .nest .on .k{color:var(--yellow)}
+
+  /* ---------- sections ---------- */
+  section{padding:64px 0;border-bottom:1px solid var(--line)}
+  .sec-head{margin-bottom:28px}
+  .sec-head h2{margin-top:6px}
+  .lede{color:var(--muted);max-width:70ch;margin-top:8px}
+
+  .cols{display:grid;grid-template-columns:1fr 1fr;gap:40px}
+  .card{
+    background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);
+    padding:20px 22px;
+  }
+  .card h3{margin-bottom:6px}
+  .card p{font-size:.92rem;color:var(--muted);margin:0}
+  .card .tag{
+    font-family:"IBM Plex Mono",monospace;font-size:.68rem;color:var(--teal-lo);
+    letter-spacing:.1em;text-transform:uppercase;
+  }
+  .stack{display:grid;gap:14px}
+
+  figure{margin:0}
+  figure img{
+    width:100%;display:block;border:1px solid var(--line);border-radius:var(--radius);
+    background:var(--panel);
+  }
+  figcaption{font-size:.82rem;color:var(--muted);margin-top:10px;font-family:"IBM Plex Mono",monospace;line-height:1.6}
+
+  /* ---------- scene tabs ---------- */
+  .tabs{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:24px}
+  .tab{
+    font-family:"IBM Plex Mono",monospace;font-size:.78rem;
+    padding:8px 14px;border:1px solid var(--line);border-radius:999px;
+    background:transparent;color:var(--muted);cursor:pointer;transition:.15s;
+  }
+  .tab:hover{color:var(--text);border-color:var(--teal)}
+  .tab[aria-selected="true"]{background:var(--teal);border-color:var(--teal);color:#06201F;font-weight:600}
+
+  /* ---------- audio table ---------- */
+  .atable{width:100%;border-collapse:collapse;table-layout:fixed}
+  .atable th,.atable td{padding:11px 12px;border-bottom:1px solid var(--line);text-align:left;vertical-align:middle}
+  .atable thead th{
+    font-family:"IBM Plex Mono",monospace;font-size:.68rem;letter-spacing:.12em;
+    text-transform:uppercase;color:var(--muted);font-weight:500;border-bottom:1px solid var(--line);
+  }
+  .atable th.sys{width:210px}
+  .atable td.sys{font-size:.9rem}
+  .atable td.sys small{display:block;color:var(--muted);font-family:"IBM Plex Mono",monospace;font-size:.68rem}
+  .atable tr.ours td{background:rgba(253,231,37,.045)}
+  .atable tr.ours td.sys{border-left:2px solid var(--yellow);font-weight:600}
+  .atable tr.gt td{background:rgba(255,255,255,.025)}
+  .atable tr.gt td.sys{border-left:2px solid var(--muted)}
+  audio{width:100%;height:36px;display:block}
+  audio::-webkit-media-controls-panel{background:var(--panel-2)}
+
+  /* ---------- metric tables ---------- */
+  .mtable{width:100%;border-collapse:collapse;font-family:"IBM Plex Mono",monospace;font-size:.82rem}
+  .mtable caption{
+    text-align:left;font-family:"IBM Plex Sans",sans-serif;font-size:.86rem;color:var(--muted);
+    padding-bottom:10px;
+  }
+  .mtable th,.mtable td{padding:9px 10px;border-bottom:1px solid var(--line);text-align:right}
+  .mtable th:first-child,.mtable td:first-child{text-align:left}
+  .mtable thead th{color:var(--muted);font-weight:500;font-size:.72rem;letter-spacing:.06em}
+  .mtable tbody tr.best td{color:var(--yellow)}
+  .mtable tbody tr.best td:first-child{font-weight:600}
+  .mtable tbody tr.ref td{color:var(--muted)}
+  .b{color:var(--yellow);font-weight:600}
+  .scroll{overflow-x:auto}
+
+  footer{padding:46px 0 70px;color:var(--muted);font-size:.85rem}
+  .cite{
+    background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);
+    padding:16px 18px;font-family:"IBM Plex Mono",monospace;font-size:.74rem;
+    white-space:pre;overflow-x:auto;color:var(--muted);line-height:1.7;margin-bottom:26px;
+  }
+
+  @media (max-width:900px){
+    .hero-grid,.cols{grid-template-columns:1fr;gap:28px}
+    .nest{flex-direction:column}
+    .nest div{border-right:0;border-bottom:1px solid var(--line);padding:12px 0}
+    .atable th.sys{width:130px}
+    .atable th,.atable td{padding:9px 6px}
+  }
+  @media (prefers-reduced-motion:reduce){
+    html{scroll-behavior:auto}
+    *{animation:none!important;transition:none!important}
+  }
+</style>
+</head>
+<body>
+
+<!-- ============ HERO ============ -->
+<header class="hero">
+  <div class="wrap">
+    <div class="hero-grid">
+      <div>
+        <p class="eyebrow">DCASE 2023 Task 7 · Foley sound synthesis</p>
+        <h1>Scene-Conditioned Foley Sound Synthesis via <span class="em">Schrödinger Bridge</span> Conditional Flow Matching</h1>
+        <p class="authors">Eojin Kim, Chanjun Chun</p>
+        <p class="affil">Department of Computer Engineering, Chosun University, Gwangju, Republic of Korea</p>
+        <div class="badges">
+          <a class="badge primary" href="#samples">Listen to samples</a>
+          <a class="badge" href="paper.pdf">Paper (PDF)</a>
+          <a class="badge" href="https://github.com/jjj33325">Code</a>
+        </div>
+      </div>
+
+      <div class="bridge">
+        <canvas id="bridgeCanvas" aria-label="Animated illustration of the optimal-transport-coupled Brownian bridge: paths spread apart in the middle of the trajectory and collapse onto the endpoints."></canvas>
+        <div class="bridge-cap">
+          <span>x₀ ~ N(0, I)</span>
+          <span>σ_t = σ√(2t(1−t)), σ = 0.05</span>
+          <span>x₁ ~ p_data</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="nest">
+      <div class="on">
+        <div class="k">SB-CFM</div>
+        <div class="v">σ &gt; 0, OT coupling — ours</div>
+      </div>
+      <div>
+        <div class="k">⊃ OT-CFM</div>
+        <div class="v">σ = 0, OT coupling</div>
+      </div>
+      <div>
+        <div class="k">⊃ CFM</div>
+        <div class="v">σ = 0, independent pairing</div>
+      </div>
+      <div>
+        <div class="k">FAD 2.57</div>
+        <div class="v">−46.0% vs. strongest baseline</div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- ============ METHOD ============ -->
+<section id="method">
+  <div class="wrap">
+    <div class="sec-head">
+      <p class="eyebrow">How it works</p>
+      <h2>A stochastic bridge in the mel domain, steered by an RMS envelope</h2>
+      <p class="lede">Foley is a one-to-many problem on a small corpus: seven labels, about 5.4 hours of audio, and each label covers many acoustically valid sounds. Our system keeps that fan-out instead of averaging it away.</p>
+    </div>
+
+    <div class="cols" style="margin-bottom:44px">
+      <div class="stack">
+        <div class="card">
+          <span class="tag">Probability path</span>
+          <h3>Schrödinger bridge, not a denoising chain</h3>
+          <p>We interpolate linearly between a standard-Gaussian source and a target log-mel spectrogram, then add a Brownian-bridge perturbation whose variance vanishes at both endpoints and peaks at t = ½. The marginals stay matched exactly while the interior of every path is randomized, so a single label can still fan out into many valid sounds. The network regresses the closed-form velocity — training is simulation-free mean-squared regression, with no score to estimate.</p>
+        </div>
+        <div class="card">
+          <span class="tag">Coupling</span>
+          <h3>Intra-class optimal transport</h3>
+          <p>Each mini-batch is coupled with an exact Hungarian assignment, restricted to run within each scene class so class identity is preserved and the O(B³) solve breaks into per-class blocks. Short, non-crossing paths mean the learned velocity field stays close to straight, which is what buys the low step count.</p>
+        </div>
+        <div class="card">
+          <span class="tag">Conditioning</span>
+          <h3>RMS envelope as a first-class signal</h3>
+          <p>Scene identity enters every residual block through zero-initialized adaptive group normalization. The frame-level RMS envelope of the target enters separately: block-wise FiLM in the decoder pools it into 32 blocks and predicts a per-block scale and shift, and a lightweight zero-init 1-D convolution adds channel-wise modulation in the encoder. This is what gives explicit control over <em>when</em> energy appears — and removing it is the single most damaging ablation.</p>
+        </div>
+        <div class="card">
+          <span class="tag">Sampling</span>
+          <h3>Stochastic Euler update + per-scene guidance</h3>
+          <p>The deterministic Euler step is perturbed with isotropic noise scaled to the training bridge (σ_stoch = ησ√2, η = 0.25), with no noise on the final step so the terminal marginal is unperturbed. Classifier-free guidance trades diversity against fidelity, and the scale is chosen per scene. Both samplers cost the same two network passes per step.</p>
+        </div>
+      </div>
+
+      <figure>
+        <img src="assets/fig1_pipeline.png" alt="Overview of the SB-CFM pipeline: a target log-mel spectrogram and a Gaussian source are coupled by optimal transport, mixed along a Schrödinger-bridge path, and regressed by a conditional velocity U-Net; at inference an Euler-Maruyama sampler with classifier-free guidance produces a mel spectrogram that HiFi-GAN renders to a waveform.">
+        <figcaption>Fig. 1 — Training (top): a target log-mel spectrogram x₁ and a Gaussian source x₀ are coupled within class, mixed along the Schrödinger-bridge path, and the U-Net regresses the closed-form velocity. Generation (bottom): a 50-step Euler-Maruyama sampler with classifier-free guidance, decoded by the official DCASE HiFi-GAN vocoder.</figcaption>
+      </figure>
+    </div>
+
+    <div class="cols">
+      <div class="card">
+        <span class="tag">Velocity network</span>
+        <h3>2-D U-Net over log-mel</h3>
+        <p>80 mel bands × 345 frames from four seconds at 22.05 kHz. Base width 64, multipliers [1, 2, 4, 4], three residual blocks per level, 2-D self-attention at the two deepest levels and the bottleneck. The output convolution is zero-initialized, so the flow initially leaves x₀ unchanged.</p>
+      </div>
+      <div class="card">
+        <span class="tag">Training</span>
+        <h3>1000 epochs, one uninterrupted run</h3>
+        <p>AdamW (lr 1.4e−4, weight decay 1e−6), cosine schedule with 1000 warmup steps, dropout 0.15, EMA 0.999, bf16, global batch 48 on two GPUs, class-balanced batches. Label dropout p = 0.15 for guidance; the RMS envelope is never dropped. Per-class weights up-weight gunshot (3), sneeze/cough (2), and moving motor vehicle (1.5).</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ SAMPLES ============ -->
+<section id="samples">
+  <div class="wrap">
+    <div class="sec-head">
+      <p class="eyebrow">Audio samples</p>
+      <h2>Three clips per scene, same envelope across every system</h2>
+      <p class="lede">Every clip is four seconds, monophonic, 22.05 kHz, and decoded with the same official DCASE HiFi-GAN vocoder — no system gains a vocoder advantage. Within a column, all temporally conditioned systems were given the same RMS envelope, taken from the ground-truth clip in that column.</p>
+    </div>
+
+    <div class="tabs" role="tablist" aria-label="Scene"></div>
+    <div class="scroll">
+      <table class="atable">
+        <thead>
+          <tr>
+            <th class="sys">System</th>
+            <th scope="col">Sample 1</th>
+            <th scope="col">Sample 2</th>
+            <th scope="col">Sample 3</th>
+          </tr>
+        </thead>
+        <tbody id="audioBody"></tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- ============ SPECTROGRAMS ============ -->
+<section id="spectrograms">
+  <div class="wrap">
+    <div class="sec-head">
+      <p class="eyebrow">What you hear, seen</p>
+      <h2>Mel spectrograms and envelope tracking</h2>
+      <p class="lede">The differences that the metrics report are visible: baselines smear the sharp attacks that define gunshot and footstep, while our transport paths keep onsets and harmonic structure intact.</p>
+    </div>
+
+    <figure style="margin-bottom:44px">
+      <img src="assets/fig2_spectrograms.png" alt="Mel-spectrogram comparison across the seven Foley categories, with one row per system: ground truth, PixelSNAIL, MambaFoley, T-Foley, AudioLDM, OT-CFM, and SB-CFM.">
+      <figcaption>Fig. 2 — Mel-spectrogram comparison across the seven categories. Rows, top to bottom: ground-truth recording, PixelSNAIL, MambaFoley, T-Foley, AudioLDM, OT-CFM (ours, σ=0), SB-CFM (ours).</figcaption>
+    </figure>
+
+    <div class="cols">
+      <figure>
+        <img src="assets/fig3_envelope.png" alt="Per-scene plots overlaying the RMS envelope of SB-CFM output on the conditioning target envelope.">
+        <figcaption>Fig. 3 — Temporal controllability. The RMS envelope of the generated audio (dashed) overlaid on the conditioning target (solid), one representative clip per scene. Mean E-L1 0.023, against T-Foley 0.034 and MambaFoley 0.037.</figcaption>
+      </figure>
+      <figure>
+        <img src="assets/fig4_ablation.png" alt="Ablation summary: FAD versus sampling steps for both samplers, intra-class diversity versus steps, and a sweep over the training bridge scale.">
+        <figcaption>Fig. 4 — (a) FAD vs. sampling steps for the deterministic Euler update and the proposed stochastic sampler; the gap is largest at low step counts. (b) Intra-class diversity vs. steps. (c) Sweep over the training bridge scale σ, with the optimum at 0.05.</figcaption>
+      </figure>
+    </div>
+  </div>
+</section>
+
+<!-- ============ RESULTS ============ -->
+<section id="results">
+  <div class="wrap">
+    <div class="sec-head">
+      <p class="eyebrow">Quantitative results</p>
+      <h2>Six metrics, because no single one covers fidelity, diversity, and timing</h2>
+      <p class="lede">All numbers come from a single training run without seed averaging, so small differences should be read with care. Two caveats bound comparability: the AudioLDM checkpoint is the general-purpose model rather than the challenge entry built on it, and our guidance scale is tuned per scene on the development split while baselines run at their published defaults.</p>
+    </div>
+
+    <div class="cols" style="gap:44px;margin-bottom:44px">
+      <div class="scroll">
+        <table class="mtable">
+          <caption><strong style="color:var(--text)">Table 1.</strong> Overall comparison on DCASE 2023 Task 7, averaged over the seven scenes. E-L1 applies only to temporally conditioned models. ICD is a mode-collapse diagnostic, not a quantity to maximize.</caption>
+          <thead>
+            <tr><th>Model</th><th>FAD ↓</th><th>KAD ↓</th><th>Acc ↑</th><th>ICD</th><th>CLAP ↑</th><th>E-L1 ↓</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>PixelSNAIL</td><td>10.07</td><td>6.82</td><td>0.800</td><td>2.89</td><td>0.206</td><td>–</td></tr>
+            <tr><td>T-Foley</td><td>8.03</td><td>2.29</td><td>0.934</td><td>2.90</td><td>0.285</td><td>0.0344</td></tr>
+            <tr><td>MambaFoley</td><td>7.63</td><td>1.62</td><td>0.964</td><td>2.93</td><td>0.295</td><td>0.0374</td></tr>
+            <tr><td>AudioLDM</td><td>4.77</td><td>0.86</td><td>0.981</td><td>3.02</td><td>0.340</td><td>–</td></tr>
+            <tr><td>OT-CFM (ours, σ=0)</td><td>2.90</td><td>0.61</td><td>0.983</td><td>3.18</td><td>0.339</td><td>0.0232</td></tr>
+            <tr class="best"><td>SB-CFM (ours)</td><td>2.57</td><td>0.49</td><td>0.991</td><td>3.26</td><td>0.346</td><td>0.0230</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="scroll">
+        <table class="mtable">
+          <caption><strong style="color:var(--text)">Table 3.</strong> Automatic proxy for mean opinion score (Audiobox-Aesthetics). PQ, CU, and CE are quality-oriented; PC is descriptive and higher is not better.</caption>
+          <thead>
+            <tr><th>Model</th><th>PQ ↑</th><th>CU ↑</th><th>CE ↑</th><th>PC</th></tr>
+          </thead>
+          <tbody>
+            <tr class="ref"><td>Ground truth (eval)</td><td>6.70</td><td>6.14</td><td>3.40</td><td>2.29</td></tr>
+            <tr><td>PixelSNAIL</td><td>5.99</td><td>5.27</td><td>2.93</td><td>2.37</td></tr>
+            <tr><td>T-Foley</td><td>6.36</td><td>5.79</td><td>3.13</td><td>2.12</td></tr>
+            <tr><td>MambaFoley</td><td>6.38</td><td>5.79</td><td>3.13</td><td>2.11</td></tr>
+            <tr><td>AudioLDM</td><td>6.33</td><td>5.80</td><td>3.09</td><td>2.13</td></tr>
+            <tr><td>OT-CFM (ours)</td><td>6.30</td><td>5.81</td><td>3.16</td><td>2.50</td></tr>
+            <tr class="best"><td>SB-CFM (ours)</td><td>6.44</td><td>5.86</td><td>3.16</td><td>2.52</td></tr>
+          </tbody>
+        </table>
+
+        <table class="mtable" style="margin-top:36px">
+          <caption><strong style="color:var(--text)">Table 5.</strong> Effect of RMS temporal conditioning.</caption>
+          <thead>
+            <tr><th>Conditioning</th><th>FAD ↓</th><th>KAD ↓</th><th>Acc ↑</th><th>ICD ↑</th><th>CLAP ↑</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Class only</td><td>6.27</td><td>1.050</td><td>0.973</td><td>2.85</td><td>0.310</td></tr>
+            <tr class="best"><td>Class + RMS</td><td>2.57</td><td>0.498</td><td>0.991</td><td>3.26</td><td>0.346</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="scroll" style="margin-bottom:44px">
+      <table class="mtable">
+        <caption><strong style="color:var(--text)">Table 2.</strong> Per-scene FAD (↓). SB-CFM outperforms every prior baseline in all seven categories; its own σ=0 ablation edges it on gunshot by 0.01.</caption>
+        <thead>
+          <tr><th>Scene</th><th>PixelSNAIL</th><th>T-Foley</th><th>MambaFoley</th><th>AudioLDM</th><th>OT-CFM</th><th>SB-CFM</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Dog bark</td><td>10.92</td><td>8.16</td><td>6.13</td><td>5.17</td><td>2.50</td><td class="b">1.92</td></tr>
+          <tr><td>Foot step</td><td>10.29</td><td>7.71</td><td>8.64</td><td>4.89</td><td>2.60</td><td class="b">2.36</td></tr>
+          <tr><td>Gun shot</td><td>8.40</td><td>5.02</td><td>4.87</td><td>5.66</td><td class="b">2.35</td><td>2.36</td></tr>
+          <tr><td>Keyboard</td><td>4.72</td><td>7.43</td><td>9.62</td><td>2.67</td><td>2.10</td><td class="b">1.56</td></tr>
+          <tr><td>Mov. motor</td><td>19.60</td><td>19.24</td><td>13.61</td><td>7.21</td><td>6.80</td><td class="b">6.28</td></tr>
+          <tr><td>Rain</td><td>13.15</td><td>5.31</td><td>6.72</td><td>6.27</td><td>2.65</td><td class="b">2.52</td></tr>
+          <tr><td>Sneeze/cough</td><td>3.41</td><td>3.36</td><td>3.79</td><td>1.50</td><td>1.28</td><td class="b">1.05</td></tr>
+          <tr><td><strong>Average</strong></td><td>10.07</td><td>8.03</td><td>7.63</td><td>4.765</td><td>2.897</td><td class="b">2.572</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="cols" style="gap:44px">
+      <div class="scroll">
+        <table class="mtable">
+          <caption><strong style="color:var(--text)">Table 4.</strong> Joint effect of the training bridge scale σ and the sampler, with the OT coupling fixed, so σ=0 is exactly OT-CFM. Rows 1–2 isolate the bridge; rows 2–3 isolate the sampler. Neither alone accounts for the full gain.</caption>
+          <thead>
+            <tr><th>σ</th><th>Sampler</th><th>FAD ↓</th><th>KAD ↓</th><th>Acc ↑</th><th>ICD</th><th>CLAP ↑</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>0.00 (OT-CFM)</td><td>Determ.</td><td>2.90</td><td>0.610</td><td>0.983</td><td>3.180</td><td>0.339</td></tr>
+            <tr><td>0.05</td><td>Determ.</td><td>2.67</td><td>0.649</td><td>0.983</td><td>3.245</td><td>0.301</td></tr>
+            <tr class="best"><td>0.05</td><td>Stoch.</td><td>2.57</td><td>0.498</td><td>0.991</td><td>3.261</td><td>0.346</td></tr>
+            <tr><td>0.10</td><td>Stoch.</td><td>3.11</td><td>0.631</td><td>0.989</td><td>3.160</td><td>0.343</td></tr>
+            <tr><td>0.15</td><td>Stoch.</td><td>3.29</td><td>0.660</td><td>0.971</td><td>3.230</td><td>0.334</td></tr>
+            <tr><td>0.20</td><td>Stoch.</td><td>3.06</td><td>0.705</td><td>0.979</td><td>3.250</td><td>0.339</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="scroll">
+        <table class="mtable">
+          <caption><strong style="color:var(--text)">Table 6.</strong> Per-scene guidance scale and resulting metrics. Sparse transients prefer strong guidance; the dense keyboard texture prefers weak guidance that preserves its fine variation. KAD is a whole-distribution metric, reported only as an average (0.49).</caption>
+          <thead>
+            <tr><th>Scene</th><th>CFG</th><th>FAD ↓</th><th>Acc ↑</th><th>ICD ↑</th><th>CLAP ↑</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Dog bark</td><td>3.5</td><td>1.92</td><td>1.000</td><td>3.85</td><td>0.401</td></tr>
+            <tr><td>Foot step</td><td>3.0</td><td>2.36</td><td>0.990</td><td>3.53</td><td>0.208</td></tr>
+            <tr><td>Gun shot</td><td>5.0</td><td>2.36</td><td>0.990</td><td>3.29</td><td>0.452</td></tr>
+            <tr><td>Keyboard</td><td>0.5</td><td>1.56</td><td>0.990</td><td>2.71</td><td>0.407</td></tr>
+            <tr><td>Mov. motor</td><td>5.0</td><td>6.28</td><td>1.000</td><td>3.98</td><td>0.201</td></tr>
+            <tr><td>Rain</td><td>1.5</td><td>2.52</td><td>0.990</td><td>3.50</td><td>0.393</td></tr>
+            <tr><td>Sneeze/cough</td><td>5.0</td><td>1.05</td><td>0.977</td><td>1.97</td><td>0.363</td></tr>
+            <tr class="best"><td>Average</td><td>–</td><td>2.572</td><td>0.991</td><td>3.261</td><td>0.346</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ FOOTER ============ -->
+<footer>
+  <div class="wrap">
+    <p class="eyebrow" style="margin-bottom:12px">Cite</p>
+    <div class="cite">@article{kim2026sbcfm,
+  title   = {Scene-Conditioned Foley Sound Synthesis via Schr\"{o}dinger Bridge Conditional Flow Matching},
+  author  = {Kim, Eojin and Chun, Chanjun},
+  journal = {IEEE Access},
+  year    = {2026}
+}</div>
+    <p>Eojin Kim and Chanjun Chun · Department of Computer Engineering, Chosun University · <a href="mailto:jjj333@chosun.ac.kr">jjj333@chosun.ac.kr</a></p>
+  </div>
+</footer>
+
+<script>
+/* =========================================================================
+   1. EDIT HERE — scenes, systems, and how many samples per scene.
+   File layout expected:  audio/<systemKey>/<sceneKey>_1.wav … _3.wav
+   ========================================================================= */
+const SAMPLES_PER_SCENE = 3;
+
+const SCENES = [
+  { key: "dog_bark",     label: "Dog bark" },
+  { key: "footstep",     label: "Foot step" },
+  { key: "gunshot",      label: "Gun shot" },
+  { key: "keyboard",     label: "Keyboard" },
+  { key: "moving_motor", label: "Moving motor vehicle" },
+  { key: "rain",         label: "Rain" },
+  { key: "sneeze_cough", label: "Sneeze / cough" }
+];
+
+const SYSTEMS = [
+  { key: "gt",         label: "Ground truth",        note: "DCASE 2023 eval split", cls: "gt" },
+  { key: "pixelsnail", label: "PixelSNAIL",          note: "official baseline [1]" },
+  { key: "tfoley",     label: "T-Foley",             note: "waveform diffusion [4]" },
+  { key: "mambafoley", label: "MambaFoley",          note: "SSM diffusion [5]" },
+  { key: "audioldm",   label: "AudioLDM",            note: "latent diffusion [6]" },
+  { key: "otcfm",      label: "OT-CFM (ours, σ=0)",  note: "deterministic limit" },
+  { key: "sbcfm",      label: "SB-CFM (ours)",       note: "σ=0.05, stochastic", cls: "ours" }
+];
+/* ========================================================================= */
+
+const tabsEl = document.querySelector(".tabs");
+const bodyEl = document.getElementById("audioBody");
+
+function render(sceneKey) {
+  bodyEl.innerHTML = SYSTEMS.map(sys => {
+    const cells = Array.from({ length: SAMPLES_PER_SCENE }, (_, i) =>
+      `<td><audio controls preload="none" src="audio/${sys.key}/${sceneKey}_${i + 1}.wav"></audio></td>`
+    ).join("");
+    return `<tr class="${sys.cls || ""}">
+      <td class="sys">${sys.label}<small>${sys.note}</small></td>${cells}
+    </tr>`;
+  }).join("");
+}
+
+SCENES.forEach((scene, i) => {
+  const b = document.createElement("button");
+  b.className = "tab";
+  b.type = "button";
+  b.role = "tab";
+  b.textContent = scene.label;
+  b.setAttribute("aria-selected", i === 0 ? "true" : "false");
+  b.addEventListener("click", () => {
+    tabsEl.querySelectorAll(".tab").forEach(t => t.setAttribute("aria-selected", "false"));
+    b.setAttribute("aria-selected", "true");
+    render(scene.key);
+  });
+  tabsEl.appendChild(b);
+});
+render(SCENES[0].key);
+
+/* ---- signature: optimal-transport-coupled Brownian bridge ---- */
+(function bridge() {
+  const c = document.getElementById("bridgeCanvas");
+  const ctx = c.getContext("2d");
+  const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const N = 7, STEPS = 160;
+  let paths = [], t0 = 0;
+
+  function resize() {
+    const dpr = window.devicePixelRatio || 1;
+    c.width = c.clientWidth * dpr;
+    c.height = c.clientHeight * dpr;
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  }
+
+  function makePaths() {
+    // each path: straight line + Brownian bridge deviation, zero at both ends
+    paths = Array.from({ length: N }, (_, i) => {
+      const y0 = (i - (N - 1) / 2) / (N - 1);   // fan of sources
+      const y1 = y0 * 0.35 + (Math.random() - 0.5) * 0.12; // OT-coupled: nearby target
+      let w = 0;
+      const pts = [];
+      for (let s = 0; s <= STEPS; s++) {
+        const t = s / STEPS;
+        w += (Math.random() - 0.5) * 0.9;
+        const bridgeDev = (w - w * t) * Math.sqrt(2 * t * (1 - t)) * 0.055;
+        pts.push([t, (1 - t) * y0 + t * y1 + bridgeDev]);
+      }
+      // pin the endpoint exactly
+      pts[STEPS][1] = y1;
+      return pts;
+    });
+  }
+
+  function draw(now) {
+    const W = c.clientWidth, H = c.clientHeight;
+    const padX = 26, padY = 18;
+    const X = t => padX + t * (W - padX * 2);
+    const Y = v => H / 2 + v * (H / 2 - padY);
+    const prog = reduced ? 1 : Math.min(1, ((now - t0) / 2600) % 1.35);
+
+    ctx.clearRect(0, 0, W, H);
+
+    // σ_t envelope, the lens that vanishes at both endpoints
+    ctx.beginPath();
+    for (let s = 0; s <= STEPS; s++) {
+      const t = s / STEPS;
+      ctx.lineTo(X(t), Y(-0.62 * Math.sqrt(2 * t * (1 - t))));
+    }
+    for (let s = STEPS; s >= 0; s--) {
+      const t = s / STEPS;
+      ctx.lineTo(X(t), Y(0.62 * Math.sqrt(2 * t * (1 - t))));
+    }
+    ctx.closePath();
+    const g = ctx.createLinearGradient(X(0), 0, X(1), 0);
+    g.addColorStop(0, "rgba(68,1,84,.75)");
+    g.addColorStop(0.5, "rgba(33,145,140,.30)");
+    g.addColorStop(1, "rgba(253,231,37,.16)");
+    ctx.fillStyle = g;
+    ctx.fill();
+
+    // trajectories
+    paths.forEach((pts, i) => {
+      ctx.beginPath();
+      const last = Math.floor(prog * STEPS);
+      for (let s = 0; s <= last; s++) ctx.lineTo(X(pts[s][0]), Y(pts[s][1]));
+      ctx.strokeStyle = i === Math.floor(N / 2) ? "rgba(253,231,37,.95)" : "rgba(232,229,242,.34)";
+      ctx.lineWidth = i === Math.floor(N / 2) ? 1.6 : 1;
+      ctx.stroke();
+      if (last > 0 && last < STEPS) {
+        ctx.beginPath();
+        ctx.arc(X(pts[last][0]), Y(pts[last][1]), 2.2, 0, 6.284);
+        ctx.fillStyle = i === Math.floor(N / 2) ? "#FDE725" : "rgba(232,229,242,.6)";
+        ctx.fill();
+      }
+    });
+
+    // endpoint rails
+    [0, 1].forEach(t => {
+      ctx.beginPath();
+      ctx.moveTo(X(t), padY);
+      ctx.lineTo(X(t), H - padY);
+      ctx.strokeStyle = "rgba(46,38,80,.9)";
+      ctx.lineWidth = 1;
+      ctx.stroke();
+    });
+
+    if (!reduced) {
+      if (prog >= 1.34) { makePaths(); t0 = now; }
+      requestAnimationFrame(draw);
+    }
+  }
+
+  resize(); makePaths(); t0 = performance.now();
+  requestAnimationFrame(draw);
+  window.addEventListener("resize", () => { resize(); if (reduced) requestAnimationFrame(draw); });
+})();
+</script>
+</body>
+</html>
