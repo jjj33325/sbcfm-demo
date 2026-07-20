@@ -97,7 +97,7 @@ audio/                      4 s, 22.05 kHz, systems compared as published (see n
   tfoley/
   mambafoley/
   audioldm/
-  otcfm/                    ours, σ=0 (OT-CFM, deterministic limit)
+  icfm/                     ours, independent coupling (I-CFM ablation)
   sbcfm/                    ours, σ=0.05, SDE sampler
 ```
 
