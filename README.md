@@ -73,12 +73,13 @@ not the challenge entry built on it, which added task-specific pre-training on e
 And a single guidance scale w = 3.0 is used throughout — every baseline at its published default,
 all of our own variants sharing the same w — so the ablations vary the flow formulation alone.
 
-![Mel-spectrogram comparison across the seven Foley categories, one row per system: the original recording, PixelSNAIL, MambaFoley, T-Foley, AudioLDM, OT-CFM, and SB-CFM.](assets/spectrograms.png)
+![Mel-spectrogram comparison across the seven Foley categories, one row per system: the original recording, PixelSNAIL, MambaFoley, T-Foley, AudioLDM, I-CFM, OT-CFM, and SB-CFM.](assets/spectrograms.png)
 
-**Fig. 2** — Mel-spectrogram comparison across the seven categories. Rows, top to bottom: original
-recording, PixelSNAIL, MambaFoley, T-Foley, AudioLDM, OT-CFM (our σ=0 ablation), SB-CFM. SB-CFM most
-closely reproduces the onsets of transient sounds and the harmonic structure of tonal ones; the
-discrete baseline blurs, and the diffusion baselines add high-frequency artifacts.
+**Fig. 2** — Mel-spectrogram comparison across the seven categories, shown for the first sample of
+each. Rows, top to bottom: original recording, PixelSNAIL, MambaFoley, T-Foley, AudioLDM, I-CFM
+(independent coupling), OT-CFM (σ=0), SB-CFM. **SB-CFM tracks the original most closely of all
+systems** — it reproduces the onsets of transient sounds and the harmonic structure of tonal ones,
+where the discrete baseline blurs and the diffusion baselines add high-frequency artifacts.
 
 Every scene, three clips per system, plus the envelope-tracking overlays are on the
 [demo page](https://jjj33325.github.io/sbcfm-demo).
