@@ -336,7 +336,7 @@
     <div class="head">
       <span class="eyebrow">§ V — Demo</span>
       <h2>Three clips per scene, one envelope per column</h2>
-      <p class="lede">Every clip is four seconds, monophonic, 22.05 kHz. Within a column, all temporally conditioned systems were given the same RMS envelope, taken from the original recording in that column; PixelSNAIL and AudioLDM take no envelope. A single classifier-free guidance scale w = 3.0 is used throughout — every baseline at its published default, and all of our own variants sharing the same w. Systems are compared as published rather than under a shared vocoder: SB-CFM, OT-CFM, and PixelSNAIL use the official DCASE HiFi-GAN vocoder, T-Foley and MambaFoley synthesize waveforms directly, and AudioLDM uses the vocoder shipped with its own pipeline.</p>
+      <p class="lede">Every clip is four seconds, monophonic, 22.05 kHz. Within a column, all temporally conditioned systems were given the same RMS envelope, taken from the original recording in that column; PixelSNAIL and AudioLDM take no envelope. A single classifier-free guidance scale w = 3.0 is used throughout — every baseline at its published default, and all of our own variants sharing the same w. Systems are compared as published rather than under a shared vocoder: SB-CFM, I-CFM, and PixelSNAIL use the official DCASE HiFi-GAN vocoder, T-Foley and MambaFoley synthesize waveforms directly, and AudioLDM uses the vocoder shipped with its own pipeline.</p>
     </div>
 
     <div class="tabs" role="tablist" aria-label="Scene"></div>
@@ -366,8 +366,8 @@
     </div>
 
     <figure style="margin-bottom:48px">
-      <img src="assets/spectrograms.png" alt="Mel-spectrogram comparison across the seven Foley categories, with one row per system: the original recording, PixelSNAIL, MambaFoley, T-Foley, AudioLDM, OT-CFM, and SB-CFM.">
-      <figcaption><b>Fig. 2</b> — Mel-spectrogram comparison across the seven categories. Rows, top to bottom: original recording, PixelSNAIL, MambaFoley, T-Foley, AudioLDM, OT-CFM (our σ=0 ablation), SB-CFM. SB-CFM most closely reproduces the onsets of transient sounds and the harmonic structure of tonal ones; the discrete baseline blurs, and the diffusion baselines add high-frequency artifacts.</figcaption>
+      <img src="assets/spectrograms.png" alt="Mel-spectrogram comparison across the seven Foley categories, with one row per system: the original recording, PixelSNAIL, MambaFoley, T-Foley, AudioLDM, I-CFM, and SB-CFM.">
+      <figcaption><b>Fig. 2</b> — Mel-spectrogram comparison across the seven categories. Rows, top to bottom: original recording, PixelSNAIL, MambaFoley, T-Foley, AudioLDM, I-CFM (independent coupling), SB-CFM. SB-CFM most closely reproduces the onsets of transient sounds and the harmonic structure of tonal ones; the discrete baseline blurs, and the diffusion baselines add high-frequency artifacts.</figcaption>
     </figure>
 
     <figure>
@@ -436,7 +436,7 @@
     <details open>
       <summary><span class="sum-l"><span class="tag">Table 3</span> Anatomy of the flow formulation</span><span class="sign"></span></summary>
       <div class="det-body scroll">
-        <p class="mcap">Each of the first four rows changes one factor with respect to the row above, at fixed architecture, conditioning, and guidance. <b>Most of the margin is the flow-matching framework itself:</b> I-CFM — independent coupling, no bridge, deterministic — already reaches 4.00, below AudioLDM's 4.77. The <b>optimal-transport coupling</b> then supplies the single largest step (4.00 → 2.90, and every metric at once), and the bridge together with the SDE contributes the last (2.90 → 2.58). The bridge under deterministic sampling is a trade-off, not a uniform gain — it buys distributional fit at the cost of semantic alignment — and stochastic integration is what recovers it. This is why we present the bridge and the SDE as a pair.</p>
+        <p class="mcap">Each of the first four rows changes one factor with respect to the row above, at fixed architecture, conditioning, and guidance. <b>Most of the margin is the flow-matching framework itself:</b> I-CFM — independent coupling, no bridge, deterministic — already reaches 4.00, below AudioLDM's 4.77 while conditioning on the same envelope. The <b>optimal-transport coupling</b> then supplies the single largest step (4.00 → 2.90, improving every metric at once — it accounts for roughly three quarters of the total FAD gain from I-CFM to the full model), and the bridge together with the SDE contributes the last (2.90 → 2.58). The bridge under deterministic sampling is a trade-off, not a uniform gain — it buys distributional fit at the cost of semantic alignment — and stochastic integration is what recovers it. This is why we present the bridge and the SDE as a pair.</p>
         <table class="mtable">
           <thead>
             <tr><th>Variant</th><th>Coupling</th><th>σ</th><th>Sampler</th><th>FAD ↓</th><th>KAD ↓</th><th>Acc ↑</th><th>ICD</th><th>CLAP ↑</th></tr>
@@ -517,7 +517,7 @@ const SYSTEMS = [
   { key: "tfoley",     label: "T-Foley",            note: "waveform diffusion [4]" },
   { key: "mambafoley", label: "MambaFoley",         note: "SSM diffusion [5]" },
   { key: "audioldm",   label: "AudioLDM",           note: "latent diffusion [6]" },
-  { key: "otcfm",      label: "OT-CFM (ours, σ=0)", note: "deterministic limit" },
+  { key: "icfm",       label: "I-CFM (ours)",       note: "independent coupling" },
   { key: "sbcfm",      label: "SB-CFM (ours)",      note: "σ=0.05, SDE sampler", cls: "ours" }
 ];
 /* ========================================================================= */
