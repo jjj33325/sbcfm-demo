@@ -25,22 +25,27 @@ categories: dog bark, footstep, gunshot, keyboard, moving motor vehicle, rain, a
 
 The task is small-data (about 5.4 hours of labeled audio) and one-to-many: each label admits many
 acoustically valid realizations, so the central tension is between scene fidelity and diversity.
-Instead of reversing a diffusion chain, we transport a standard Gaussian source to the data along
-an optimal-transport-coupled Brownian-bridge path, regress the closed-form velocity, and generate
-by integrating an SDE scaled to that same bridge. The bridge
-noise vanishes at both endpoints and peaks in the middle, so the marginals stay matched exactly
-while the interior of each path is randomized — the model keeps the fan-out that Foley needs.
+We transport a standard Gaussian source to the data along the **Schrödinger bridge — the
+entropy-regularized form of dynamic optimal transport**, whose marginal is the OT displacement
+interpolation convolved with a Gaussian kernel that vanishes at both endpoints. This smooths the
+interior of the transport path, so the velocity field the network regresses is better conditioned
+than the unregularized OT field, while the source and data distributions are matched exactly.
+Generation integrates the bridge as an SDE, whose stochasticity broadens the set of realizations
+per scene while preserving the target marginals.
 
 Three things distinguish the model:
 
-- **Schrödinger-bridge path.** SB-CFM contains OT-CFM as the exact zero-noise limit, so σ is a
-  continuous knob rather than a design switch. This is what makes the ablation clean.
+- **Schrödinger bridge as regularized OT.** SB-CFM contains OT-CFM (σ=0) and I-CFM (independent
+  coupling) as exact limits, so the flow formulation can be decomposed one axis at a time. Most of
+  the margin comes from the flow-matching framework and the optimal-transport coupling; the bridge
+  is a meaningful but not dominant component.
 - **RMS temporal conditioning.** The frame-level RMS envelope of the target is injected through
   block-wise FiLM, giving explicit control over *when* energy appears. It is the single most
   important component: removing it more than doubles FAD.
-- **SDE sampling.** Rather than integrating the probability-flow ODE deterministically, we integrate
-  an SDE whose diffusion term is scaled to the training bridge. The bridge and the sampler turn out
-  to be complementary — neither alone accounts for the full gain.
+- **SDE sampling with a score network.** A second network predicts the bridge score, so the SDE we
+  integrate is a genuine discretization of the Schrödinger-bridge SDE. The bridge and the SDE act as
+  a pair: under deterministic sampling the bridge trades semantic alignment for distributional fit,
+  and stochastic integration recovers it.
 
 ## Results
 
@@ -53,16 +58,20 @@ without seed averaging.
 | T-Foley | 8.03 | 2.29 | 0.934 | 2.90 | 0.285 | 0.0344 |
 | MambaFoley | 7.63 | 1.62 | 0.964 | 2.93 | 0.295 | 0.0374 |
 | AudioLDM | 4.77 | 0.86 | 0.981 | 3.02 | 0.340 | – |
+| I-CFM (ours, indep. coupling) | 4.00 | 1.20 | 0.923 | 3.16 | 0.325 | 0.0232 |
 | OT-CFM (ours, σ=0) | 2.90 | 0.61 | 0.983 | 3.18 | 0.339 | 0.0232 |
-| **SB-CFM (ours)** | **2.58** | **0.50** | **0.991** | 3.26 | **0.346** | **0.0230** |
+| **SB-CFM (ours)** | **2.58** | **0.50** | **0.991** | 3.39 | **0.346** | **0.0219** |
+
+The lower block is our own flow-matching variants, which share the architecture, conditioning,
+training schedule, and guidance scale, and differ only in the flow formulation.
 
 ICD is a mode-collapse diagnostic, not a quantity to be maximized. E-L1 applies only to
 temporally conditioned models.
 
 Two caveats bound comparability. The AudioLDM checkpoint we run is the general-purpose model,
 not the challenge entry built on it, which added task-specific pre-training on external corpora.
-And our guidance scale is tuned per scene on the development split while the baselines run at
-their published defaults.
+And a single guidance scale w = 3.0 is used throughout — every baseline at its published default,
+all of our own variants sharing the same w — so the ablations vary the flow formulation alone.
 
 ![Mel-spectrogram comparison across the seven Foley categories, one row per system: the original recording, PixelSNAIL, MambaFoley, T-Foley, AudioLDM, OT-CFM, and SB-CFM.](assets/spectrograms.png)
 
@@ -88,7 +97,7 @@ audio/                      4 s, 22.05 kHz, systems compared as published (see n
   tfoley/
   mambafoley/
   audioldm/
-  otcfm/                    ours, σ=0 (deterministic limit)
+  otcfm/                    ours, σ=0 (OT-CFM, deterministic limit)
   sbcfm/                    ours, σ=0.05, SDE sampler
 ```
 
