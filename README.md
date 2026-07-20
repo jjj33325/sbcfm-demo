@@ -98,6 +98,7 @@ audio/                      4 s, 22.05 kHz, systems compared as published (see n
   mambafoley/
   audioldm/
   icfm/                     ours, independent coupling (I-CFM ablation)
+  otcfm/                    ours, OT coupling, σ=0 (OT-CFM ablation)
   sbcfm/                    ours, σ=0.05, SDE sampler
 ```
 
