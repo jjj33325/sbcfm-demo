@@ -276,7 +276,7 @@
       <canvas id="bridge" aria-label="Animated illustration of the optimal-transport-coupled Brownian bridge. Trajectories leave a Gaussian source, spread apart through the middle of the path, and collapse exactly onto their targets."></canvas>
       <div class="band-cap">
         <span>t = 0 &nbsp;·&nbsp; x₀ ~ N(0, I)</span>
-        <span class="mid">σ_t = σ√(2t(1−t)), &nbsp;σ = 0.05</span>
+        <span class="mid">σ_t = σ√(2t(1−t)), &nbsp;σ = 0.2</span>
         <span>x₁ ~ p_data &nbsp;·&nbsp; t = 1</span>
       </div>
     </div>
@@ -316,7 +316,7 @@
   <div class="wrap">
     <div class="head">
       <span class="eyebrow">§ III — Proposed method</span>
-      <h2>A stochastic bridge in the mel domain, steered by an envelope</h2>
+      <h2>An entropy-regularized bridge in the mel domain, steered by an envelope</h2>
     </div>
 
     <div class="prose">
@@ -324,7 +324,7 @@
     </div>
 
     <figure>
-      <img src="assets/pipeline.png" alt="Overview of the SB-CFM pipeline. A target log-mel spectrogram and a Gaussian source are coupled by optimal transport, mixed along a Schrödinger-bridge path, and regressed by a conditional velocity U-Net. At inference an Euler-Maruyama sampler with classifier-free guidance produces a mel spectrogram that HiFi-GAN renders to a waveform.">
+      <img src="assets/pipeline.png" alt="Overview of the SB-CFM pipeline. A target log-mel spectrogram and a Gaussian source are paired within their scene class by an optimal-transport plan, joined along a Schrödinger-bridge path, and regressed by a single conditional velocity U-Net. At inference a deterministic Euler solver integrates the guided probability-flow ODE and HiFi-GAN renders the mel spectrogram to a waveform.">
       <figcaption><b>Fig. 1</b> — Overview of the proposed pipeline. Training (top): a target log-mel spectrogram x₁ and a Gaussian source x₀, paired within their scene class by the optimal-transport plan, are joined by the Schrödinger-bridge path into x_t; the velocity U-Net v_θ(x_t, t, c, r) — modulated by the timestep, the class embedding, and the RMS envelope — regresses the target velocity under the class-weighted objective. Inference (bottom): the same network defines the velocity field, which classifier-free guidance turns into the guided field integrated by a uniform Euler solver over 50 steps; HiFi-GAN renders the result. One network is trained and the sampler is deterministic — no score network and no stochastic term are involved.</figcaption>
     </figure>
   </div>
@@ -336,7 +336,7 @@
     <div class="head">
       <span class="eyebrow">§ V — Demo</span>
       <h2>Three clips per scene, one envelope per column</h2>
-      <p class="lede">Every clip is four seconds, monophonic, 22.05 kHz. Within a column, all temporally conditioned systems were given the same RMS envelope, taken from the original recording in that column; PixelSNAIL and AudioLDM take no envelope. A single classifier-free guidance scale w = 3.0 is used throughout — every baseline at its published default, and all of our own variants sharing the same w. Systems are compared as published rather than under a shared vocoder: SB-CFM, I-CFM, and PixelSNAIL use the official DCASE HiFi-GAN vocoder, T-Foley and MambaFoley synthesize waveforms directly, and AudioLDM uses the vocoder shipped with its own pipeline.</p>
+      <p class="lede">Every clip is four seconds, monophonic, 22.05 kHz. Within a column, all temporally conditioned systems were given the same RMS envelope, taken from the original recording in that column; PixelSNAIL and AudioLDM take no envelope. A single classifier-free guidance scale w = 3.0 is used throughout — every baseline at its published default, and all of our own variants sharing the same w. Systems are compared as published rather than under a shared vocoder: SB-CFM, OT-CFM, I-CFM, and PixelSNAIL use the official DCASE HiFi-GAN vocoder, T-Foley and MambaFoley synthesize waveforms directly, and AudioLDM uses the vocoder shipped with its own pipeline.</p>
     </div>
 
     <div class="tabs" role="tablist" aria-label="Scene"></div>
@@ -382,7 +382,7 @@
   <div class="wrap">
     <div class="head">
       <span class="eyebrow">§ V — Results</span>
-      <h2>Six metrics, because no single one covers fidelity, diversity, and timing</h2>
+      <h2>Seven metrics, because no single one covers fidelity, diversity, and timing</h2>
       <p class="lede">All numbers come from a single training run without seed averaging, so small differences should be read with care. Two caveats bound comparability: the AudioLDM checkpoint we run is the general-purpose model, not the challenge entry built on it; and a single guidance scale w = 3.0 is used throughout — every baseline at its published default, all of our own variants sharing the same w — so the ablations vary the flow formulation alone rather than a per-model guidance search.</p>
     </div>
 
@@ -480,17 +480,17 @@
     </div>
     <div class="cite">@article{kim2026sbcfm,
   title   = {Scene-Conditioned Foley Sound Synthesis via Schr\"{o}dinger Bridge Conditional Flow Matching},
-  author  = {Kim, Eojin and Chun, Chanjun},
+  author  = {Kim, Eojin and Park, Nam In and Chun, Chanjun},
   journal = {IEEE Access},
   year    = {2026}
 }</div>
-    <p class="limit"><strong>Limitations.</strong> On CLAP, semantic alignment to the class name, SB-CFM (0.338) does not overtake AudioLDM (0.358), and CLAP keeps rising past the FAD optimum (0.340 at σ=0.3) — so semantic alignment does not turn with the distributional metrics, and the choice of operating point rests on the axes that agree rather than on all of them. AudioLDM is a general-purpose text-to-audio model whose large-scale language–audio pre-training is expected to favour this text-embedding metric, which our class-conditional model, trained only on this small corpus, does not directly optimize. The broadband moving motor vehicle category is the principal headroom for every model, the one scene on which a baseline remains ahead of us. Results come from a single training run without seed averaging, so small margins should be read as indicative; evaluation relies on objective and automatic perceptual metrics rather than human listening tests.</p>
+    <p class="limit"><strong>Limitations.</strong> On CLAP, semantic alignment to the class name, SB-CFM (0.338) does not overtake AudioLDM (0.358), and CLAP keeps rising past the FAD optimum (0.340 at σ=0.3) — so semantic alignment does not turn with the distributional metrics, and the choice of operating point rests on the axes that agree rather than on all of them. AudioLDM is a general-purpose text-to-audio model whose large-scale language–audio pre-training is expected to favour this text-embedding metric, which our class-conditional model, trained only on this small corpus, does not directly optimize. The broadband moving motor vehicle category remains the principal headroom for every model — our own value there, 5.84, is 2.1 times the mean it contributes to, even though it is now below every baseline — and the per-scene breakdown locates the difficulty in sustained broadband content rather than in textures as a group. Results come from a single training run without seed averaging, so small margins should be read as indicative; evaluation relies on objective and automatic perceptual metrics rather than human listening tests.</p>
   </div>
 </section>
 
 <footer>
   <div class="wrap">
-    <p>Eojin Kim and Chanjun Chun · Department of Computer Engineering, Chosun University · <a href="mailto:jjj333@chosun.ac.kr">jjj333@chosun.ac.kr</a></p>
+    <p>Eojin Kim, Nam In Park, and Chanjun Chun · Chosun University · National Forensic Service · Glosori Inc. · <a href="mailto:jjj333@chosun.ac.kr">jjj333@chosun.ac.kr</a></p>
   </div>
 </footer>
 
@@ -574,7 +574,7 @@ render(SCENES[0].key);
       for (let s = 0; s <= STEPS; s++) {
         const t = s / STEPS;
         w += (Math.random() - 0.5);
-        const dev = (w - w * t) * Math.sqrt(2 * t * (1 - t)) * 0.05;
+        const dev = (w - w * t) * Math.sqrt(2 * t * (1 - t)) * 0.2;
         pts.push([t, (1 - t) * y0 + t * y1 + dev]);
       }
       pts[STEPS][1] = y1;                                    // pin the endpoint exactly
