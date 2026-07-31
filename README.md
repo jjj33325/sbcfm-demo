@@ -4,16 +4,18 @@ Audio demo page for our IEEE Access submission.
 
 **Demo:** https://jjj33325.github.io/sbcfm-demo
 
-Eojin Kim, Chanjun Chun
-Department of Computer Engineering, Chosun University, Gwangju, Republic of Korea
+Eojin Kim, Nam In Park, Chanjun Chun
+Chosun University · National Forensic Service · Glosori Inc.
 
-![Overview of the SB-CFM pipeline: a target log-mel spectrogram and a Gaussian source are joined by a Schrodinger-bridge path and regressed by a conditional velocity U-Net; at inference an SDE sampler with classifier-free guidance produces a mel spectrogram that HiFi-GAN renders to a waveform.](assets/pipeline.png)
+![Overview of the SB-CFM pipeline: a target log-mel spectrogram and a Gaussian source are paired within their scene class by an optimal-transport plan, joined by a Schrodinger-bridge path, and regressed by a single velocity U-Net; at inference the probability-flow ODE is integrated by a deterministic Euler solver and HiFi-GAN renders the result.](assets/pipeline.png)
 
-**Fig. 1** — Overview of the proposed pipeline. *Training* (top): a target log-mel spectrogram x₁ and a
-Gaussian source x₀ are joined by the Schrödinger-bridge path into x_t, and the velocity U-Net
-v_θ(x_t, t, c, r) — modulated by class and RMS conditioning — regresses the target velocity under
-L_FM. *Inference* (bottom): the same network is integrated from x₀ by the SDE sampler with
-classifier-free guidance, and HiFi-GAN renders the result.
+**Fig. 1** — Overview of the proposed pipeline. *Training* (top): a target log-mel spectrogram x₁ and
+a Gaussian source x₀, paired within their scene class by the optimal-transport plan, are joined by
+the Schrödinger-bridge path into x_t; the velocity U-Net v_θ(x_t, t, c, r) — modulated by the
+timestep, the class embedding, and the RMS envelope — regresses the target velocity. *Inference*
+(bottom): the same network defines the velocity field, which classifier-free guidance turns into
+the guided field integrated by a uniform Euler solver over 50 steps; HiFi-GAN renders the result.
+One network is trained and the sampler is deterministic — no score network and no stochastic term.
 
 ---
 
@@ -30,42 +32,47 @@ entropy-regularized form of dynamic optimal transport**, whose marginal is the O
 interpolation convolved with a Gaussian kernel that vanishes at both endpoints. This smooths the
 interior of the transport path, so the velocity field the network regresses is better conditioned
 than the unregularized OT field, while the source and data distributions are matched exactly.
-Generation integrates the bridge as an SDE, whose stochasticity broadens the set of realizations
-per scene while preserving the target marginals.
+Generation integrates the resulting velocity field as an **ordinary differential equation** — no
+score network is trained and no stochastic sampling is used, so the method stays in its original
+deterministic form.
 
 Three things distinguish the model:
 
-- **Schrödinger bridge as regularized OT.** SB-CFM contains OT-CFM (σ=0) and I-CFM (independent
-  coupling) as exact limits, so the flow formulation can be decomposed one axis at a time. Most of
-  the margin comes from the flow-matching framework and the optimal-transport coupling; the bridge
-  is a meaningful but not dominant component.
+- **Schrödinger bridge as regularized OT.** SB-CFM contains OT-CFM (σ=0, intra-class OT) and I-CFM
+  (independent coupling) as exact limits, so the flow formulation can be decomposed one axis at a
+  time. The intra-class optimal-transport coupling supplies the larger part of the margin, and the
+  bridge improves on it up to an interior optimum at σ=0.2.
 - **RMS temporal conditioning.** The frame-level RMS envelope of the target is injected through
   block-wise FiLM, giving explicit control over *when* energy appears. It is the single most
   important component: removing it more than doubles FAD.
-- **SDE sampling with a score network.** A second network predicts the bridge score, so the SDE we
-  integrate is a genuine discretization of the Schrödinger-bridge SDE. The bridge and the SDE act as
-  a pair: under deterministic sampling the bridge trades semantic alignment for distributional fit,
-  and stochastic integration recovers it.
+- **Velocity-only, deterministic ODE.** A single velocity network is trained and generation
+  integrates the probability-flow ODE over 50 uniform Euler steps at guidance w = 3.0. No score
+  network, no stochastic sampler.
 
 ## Results
 
 Averaged over the seven scenes on DCASE 2023 Task 7. All numbers come from a single training run
 without seed averaging.
 
-| Model | FAD ↓ | KAD ↓ | Acc ↑ | ICD | CLAP ↑ | E-L1 ↓ |
-|---|---|---|---|---|---|---|
-| PixelSNAIL | 10.07 | 6.82 | 0.800 | 2.89 | 0.206 | – |
-| T-Foley | 8.03 | 2.29 | 0.934 | 2.90 | 0.285 | 0.0344 |
-| MambaFoley | 7.63 | 1.62 | 0.964 | 2.93 | 0.295 | 0.0374 |
-| AudioLDM | 4.77 | 0.86 | 0.981 | 3.02 | 0.340 | – |
-| I-CFM (ours, indep. coupling) | 4.00 | 1.20 | 0.923 | 3.16 | 0.325 | 0.0232 |
-| OT-CFM (ours, σ=0) | 2.90 | 0.61 | 0.983 | 3.18 | 0.339 | 0.0232 |
-| **SB-CFM (ours)** | **2.58** | **0.50** | **0.991** | 3.39 | **0.346** | **0.0219** |
+| Model | FAD ↓ | KAD ↓ | Acc ↑ | Density ↑ | Cover. ↑ | CLAP ↑ | E-L1 ↓ |
+|---|---|---|---|---|---|---|---|
+| PixelSNAIL | 10.07 | 6.82 | 0.80 | 0.753 | 0.444 | 0.206 | – |
+| MambaFoley | 7.63 | 1.62 | 0.96 | 1.102 | 0.572 | 0.295 | 0.0374 |
+| T-Foley | 8.03 | 2.29 | 0.93 | 1.000 | 0.528 | 0.285 | 0.0344 |
+| AudioLDM | 4.77 | 0.86 | 0.98 | 1.001 | 0.564 | **0.358** | – |
+| I-CFM (ours, indep. coupling) | 4.53 | 0.58 | 0.95 | 1.165 | 0.697 | 0.327 | 0.0232 |
+| OT-CFM (ours, intra-class OT, σ=0) | 3.56 | 0.57 | 0.97 | 1.320 | 0.705 | 0.335 | 0.0232 |
+| **SB-CFM (ours)** | **2.75** | **0.54** | **0.99** | **1.528** | **0.721** | 0.338 | **0.0230** |
 
 The lower block is our own flow-matching variants, which share the architecture, conditioning,
-training schedule, and guidance scale, and differ only in the flow formulation.
+training schedule, guidance scale, and a 50-step Euler budget, and differ only in the flow
+formulation. Density and coverage (PANNs embeddings, k=5) replace the intra-class-diversity
+diagnostic used in earlier work; density is not capped at one.
 
-ICD is a mode-collapse diagnostic, not a quantity to be maximized. E-L1 applies only to
+SB-CFM is best on every distributional and diversity metric. The one it does not lead is **CLAP**,
+where AudioLDM (0.358) stays ahead — a general-purpose text-to-audio model whose large-scale
+language–audio pre-training is expected to favour a text-embedding metric that our class-conditional
+model, trained only on this small corpus, does not directly optimize. E-L1 applies only to
 temporally conditioned models.
 
 Two caveats bound comparability. The AudioLDM checkpoint we run is the general-purpose model,
@@ -77,9 +84,10 @@ all of our own variants sharing the same w — so the ablations vary the flow fo
 
 **Fig. 2** — Mel-spectrogram comparison across the seven categories, shown for the first sample of
 each. Rows, top to bottom: original recording, PixelSNAIL, MambaFoley, T-Foley, AudioLDM, I-CFM
-(independent coupling), OT-CFM (σ=0), SB-CFM. **SB-CFM tracks the original most closely of all
-systems** — it reproduces the onsets of transient sounds and the harmonic structure of tonal ones,
-where the discrete baseline blurs and the diffusion baselines add high-frequency artifacts.
+(independent coupling), OT-CFM (intra-class OT, σ=0), SB-CFM. **SB-CFM matches the Original most
+closely of all systems** — it reproduces the sharp onsets of transient categories and the harmonic
+and broadband structure of tonal and textured ones, where the discrete baseline blurs fine detail
+and the diffusion baselines add high-frequency artifacts.
 
 Every scene, three clips per system, plus the envelope-tracking overlays are on the
 [demo page](https://jjj33325.github.io/sbcfm-demo).
@@ -99,8 +107,8 @@ audio/                      4 s, 22.05 kHz, systems compared as published (see n
   mambafoley/
   audioldm/
   icfm/                     ours, independent coupling (I-CFM ablation)
-  otcfm/                    ours, OT coupling, σ=0 (OT-CFM ablation)
-  sbcfm/                    ours, σ=0.05, SDE sampler
+  otcfm/                    ours, intra-class OT, σ=0 (OT-CFM ablation)
+  sbcfm/                    ours, σ=0.2, deterministic ODE
 ```
 
 Each system folder holds three clips per scene, named `<scene>_1`, `<scene>_2`, `<scene>_3`, where
@@ -110,7 +118,7 @@ Each system folder holds three clips per scene, named `<scene>_1`, `<scene>_2`, 
 Within a column, every temporally conditioned system was given the same RMS envelope, taken from
 the original recording in that column.
 
-Systems are compared as published rather than under a shared vocoder. SB-CFM, OT-CFM, and
+Systems are compared as published rather than under a shared vocoder. SB-CFM, OT-CFM, I-CFM, and
 PixelSNAIL use the official DCASE HiFi-GAN vocoder; T-Foley and MambaFoley synthesize waveforms
 directly and use no vocoder; AudioLDM uses the vocoder shipped with its own pipeline.
 
@@ -124,7 +132,7 @@ at the top of the `<script>` in `index.html`. Change those and the sample table 
 ```bibtex
 @article{kim2026sbcfm,
   title   = {Scene-Conditioned Foley Sound Synthesis via Schr\"{o}dinger Bridge Conditional Flow Matching},
-  author  = {Kim, Eojin and Chun, Chanjun},
+  author  = {Kim, Eojin and Park, Nam In and Chun, Chanjun},
   journal = {IEEE Access},
   year    = {2026}
 }
