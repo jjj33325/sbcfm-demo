@@ -405,7 +405,26 @@
     </div>
 
     <div class="scroll">
-      <p class="mcap"><b>Table 2.</b> Automatic proxy for mean opinion score (Audiobox-Aesthetics). PQ, CU, and CE are quality-oriented; PC is descriptive, and higher is not better.</p>
+      <p class="mcap"><b>Table 2.</b> Per-scene FAD. Column means reproduce the FAD column of Table 1. Every system is worst on <i>moving motor vehicle</i> and best on <i>sneeze/cough</i>; the best value in each row is in bold. Of the mean improvement from I-CFM to SB-CFM, 88% comes from two scenes alone — moving motor vehicle (12.68 → 5.84) and dog bark (6.24 → 2.15). It also cuts across the transient/texture division: rain, the other texture, sits at 3.61, far closer to the transient range of 0.73–2.78 than to moving motor vehicle at 5.84 — so what separates that scene is not that it is a texture but that it is a broadband one whose spectral content is sustained. SB-CFM holds or shares the lowest FAD in six of the seven scenes; the one it loses is gunshot, the sparsest and most impulsive class, whose identity rests on a single onset that smoothing the transport interior is least suited to preserve.</p>
+      <table class="mtable">
+        <thead>
+          <tr><th>Scene</th><th>PixelSNAIL</th><th>MambaFoley</th><th>T-Foley</th><th>AudioLDM</th><th>I-CFM</th><th>OT-CFM</th><th>SB-CFM</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Dog bark</td><td>10.92</td><td>6.13</td><td>8.16</td><td>5.17</td><td>6.24</td><td>2.21</td><td><b>2.15</b></td></tr>
+          <tr><td>Footstep</td><td>10.29</td><td>8.64</td><td>7.71</td><td>4.89</td><td><b>2.23</b></td><td>3.08</td><td><b>2.23</b></td></tr>
+          <tr><td>Gunshot</td><td>8.40</td><td>4.87</td><td>5.02</td><td>5.66</td><td>2.94</td><td><b>1.99</b></td><td>2.78</td></tr>
+          <tr><td>Keyboard</td><td>4.72</td><td>9.62</td><td>7.43</td><td>2.67</td><td>2.65</td><td>2.44</td><td><b>1.89</b></td></tr>
+          <tr><td>Moving motor vehicle</td><td>19.60</td><td>13.61</td><td>19.24</td><td>7.21</td><td>12.68</td><td>10.20</td><td><b>5.84</b></td></tr>
+          <tr><td>Rain</td><td>13.15</td><td>6.72</td><td>5.31</td><td>6.27</td><td><b>3.61</b></td><td>4.22</td><td><b>3.61</b></td></tr>
+          <tr><td>Sneeze/cough</td><td>3.41</td><td>3.79</td><td>3.36</td><td>1.50</td><td>1.36</td><td>0.79</td><td><b>0.73</b></td></tr>
+          <tr class="best"><td>Mean</td><td>10.07</td><td>7.63</td><td>8.03</td><td>4.77</td><td>4.53</td><td>3.56</td><td><b>2.75</b></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="scroll">
+      <p class="mcap"><b>Table 3.</b> Automatic proxy for mean opinion score (Audiobox-Aesthetics). PQ, CU, and CE are quality-oriented; PC is descriptive, and higher is not better.</p>
       <table class="mtable">
         <thead>
           <tr><th>Model</th><th>PQ ↑</th><th>CU ↑</th><th>CE ↑</th><th>PC</th></tr>
@@ -435,7 +454,7 @@
     </div>
 
     <details open>
-      <summary><span class="sum-l"><span class="tag">Table 3</span> Anatomy of the flow formulation</span><span class="sign"></span></summary>
+      <summary><span class="sum-l"><span class="tag">Table 4</span> Anatomy of the flow formulation</span><span class="sign"></span></summary>
       <div class="det-body scroll">
         <p class="mcap">Each row changes one factor with respect to the row above, at fixed architecture, conditioning, guidance, and a deterministic 50-step Euler sampler; the σ column carries the bridge, and by construction the first two rows are exactly I-CFM and OT-CFM. <b>The intra-class optimal-transport coupling supplies the larger of the two steps</b> (I-CFM → OT-CFM: FAD 4.53 → 3.56, roughly 54% of the 1.78 that separates I-CFM from the full model). Two margins carry that claim — FAD falls by 0.97 and accuracy rises by 0.02; density rises by 0.155, and coverage, CLAP, and KAD move in the same direction by margins at or inside the run-to-run variation the σ sweep exposes. <b>The bridge then improves on that up to an interior optimum at σ=0.2</b> (FAD 3.56 → 2.75, the remaining 46%), where FAD, KAD, density, and coverage all turn together; at σ=0.3 they reverse, while CLAP — which dips at σ=0.1 before rising — keeps climbing, so semantic alignment does not turn with the distributional metrics.</p>
         <table class="mtable">
@@ -454,7 +473,7 @@
     </details>
 
     <details>
-      <summary><span class="sum-l"><span class="tag">Table 4</span> RMS temporal conditioning</span><span class="sign"></span></summary>
+      <summary><span class="sum-l"><span class="tag">Table 5</span> RMS temporal conditioning</span><span class="sign"></span></summary>
       <div class="det-body scroll">
         <p class="mcap">Under an identical protocol at σ=0.2 and 50 Euler steps, removing the envelope path is decisive: FAD more than doubles (2.75 → 6.27) and KAD nearly doubles (0.54 → 1.05), while accuracy and semantic alignment both fall. Without it the model retains the correct class but loses the temporal energy structure that distinguishes realizations within it. <b>Temporal conditioning is a central component, not an auxiliary refinement.</b></p>
         <table class="mtable">
