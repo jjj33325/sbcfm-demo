@@ -38,11 +38,13 @@ deterministic form.
 
 Three things distinguish the model:
 
-- **Schrödinger bridge as regularized OT.** SB-CFM contains OT-CFM (σ=0, intra-class OT) and I-CFM
-  (independent coupling) as exact limits, so the flow formulation can be decomposed one axis at a
-  time. The intra-class optimal-transport coupling supplies 54% of the improvement from independent
-  pairing to the full model (FAD 4.53 → 3.56) and the bridge the remaining 46% (3.56 → 2.75), with
-  an interior optimum at σ=0.2 at which FAD, KAD, density, and coverage turn together.
+- **Schrödinger bridge as regularized OT.** SB-CFM recovers OT-CFM exactly in the deterministic
+  limit σ→0, and replacing the intra-class OT coupling with independent pairing recovers I-CFM —
+  two exact reductions of different kinds, one continuous and one a change of coupling, so the flow
+  formulation can be decomposed one axis at a time. The coupling supplies roughly 54% of the
+  improvement from independent pairing to the full model (FAD 4.53 → 3.56) and the bridge the
+  remaining 46% (3.56 → 2.75), with an interior optimum at σ=0.2 at which FAD, KAD, density, and
+  coverage turn together.
 - **RMS temporal conditioning.** The frame-level RMS envelope of the target is injected through
   block-wise FiLM, giving explicit control over *when* energy appears. It is the single most
   important component: removing it more than doubles FAD.
@@ -71,7 +73,10 @@ formulation. Density and coverage (PANNs embeddings, k=5) replace the intra-clas
 diagnostic used in earlier work; density is not capped at one.
 
 SB-CFM is best on six of the seven metrics — FAD, KAD, accuracy, density, coverage, and E-L1.
-The one it does not lead is **CLAP**, where AudioLDM (0.358) stays ahead — a general-purpose text-to-audio model whose large-scale
+The E-L1 margin belongs to the RMS conditioning rather than to the flow formulation: it is flat
+across our three variants (0.0232 / 0.0232 / 0.0230) and the gap that matters is against the
+waveform-domain baselines (0.0344, 0.0374). The one metric it does not lead is **CLAP**, where
+AudioLDM (0.358) stays ahead — a general-purpose text-to-audio model whose large-scale
 language–audio pre-training is expected to favour a text-embedding metric that our class-conditional
 model, trained only on this small corpus, does not directly optimize. E-L1 applies only to
 temporally conditioned models.
@@ -99,9 +104,10 @@ best on *sneeze/cough*.
 
 The difficulty is concentrated rather than distributed: of the mean improvement from I-CFM to
 SB-CFM, 88% comes from two scenes alone — moving motor vehicle (12.68 → 5.84) and dog bark
-(6.24 → 2.15). It also cuts across the transient/texture division, since rain sits at 3.61, nearer
-the transient scenes than moving motor vehicle at 5.84 — so what separates that scene is not that
-it is a texture but that it is a broadband one whose spectral content is sustained. SB-CFM holds or
+(6.24 → 2.15). It also cuts across the transient/texture division: rain, the other texture, sits at 3.61, far
+closer to the transient range of 0.73–2.78 than to moving motor vehicle at 5.84 — so what separates
+that scene is not that it is a texture but that it is a broadband one whose spectral content is
+sustained. SB-CFM holds or
 shares the lowest FAD in six of the seven scenes; the one it loses is gunshot, the sparsest and
 most impulsive class, whose identity rests on a single onset that smoothing the transport interior
 is least suited to preserve.
