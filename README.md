@@ -121,7 +121,7 @@ closely of all systems** — it reproduces the sharp onsets of transient categor
 and broadband structure of tonal and textured ones, where the discrete baseline blurs fine detail
 and the diffusion baselines add high-frequency artifacts.
 
-Every scene, three clips per system, plus the envelope-tracking overlays are on the
+Every scene, two clips per system, plus the envelope-tracking overlays are on the
 [demo page](https://jjj33325.github.io/sbcfm-demo).
 
 ## Repository layout
@@ -143,8 +143,8 @@ audio/                      4 s, 22.05 kHz, systems compared as published (see n
   sbcfm/                    ours, σ=0.2, deterministic ODE
 ```
 
-Each system folder holds three clips per scene, named `<scene>_1`, `<scene>_2`, `<scene>_3`, where
-`<scene>` is one of `dog_bark`, `footstep`, `gunshot`, `keyboard`, `moving_motor_vehicle`, `rain`,
+Each system folder holds two clips per scene, named `<scene>_1` and `<scene>_2`, where `<scene>`
+is one of `dog_bark`, `footstep`, `gunshot`, `keyboard`, `moving_motor_vehicle`, `rain`,
 `sneeze_cough`.
 
 Within a column, every temporally conditioned system was given the same RMS envelope, taken from
