@@ -224,7 +224,6 @@
     padding:20px 22px;font-family:"JetBrains Mono",monospace;font-size:.72rem;
     line-height:1.85;color:var(--dim);white-space:pre;overflow-x:auto;margin:0 0 28px;
   }
-  .limit{border-left:3px solid var(--teal);padding:2px 0 2px 18px;color:var(--dim);font-size:.94rem;max-width:78ch}
   footer{padding:44px 0 80px;border-top:1px solid var(--rule)}
   footer p{color:var(--faint);font-size:.84rem;margin:0}
 
@@ -371,7 +370,7 @@
 
     <figure>
       <img src="assets/envelope.png" alt="Per-scene plots overlaying the RMS envelope of SB-CFM output on the conditioning target envelope, one representative clip per scene.">
-      <figcaption><b>Fig. 3</b> — Temporal controllability. For one representative clip per scene, the RMS envelope of the generated audio (dashed) is overlaid on the conditioning target (solid), with per-clip E-L1 annotated. Onsets and decays are followed closely; deviations concentrate in amplitude overshoot on sparse transients and in the broadband moving motor vehicle texture. Mean E-L1 0.0230, against T-Foley 0.0344 and MambaFoley 0.0374.</figcaption>
+      <figcaption><b>Fig. 3</b> — Temporal controllability. For one representative clip per scene, the RMS envelope of the generated audio (dashed) is overlaid on the conditioning target (solid), with per-clip E-L1 annotated; those are the values for the illustrated clips and do not average to the dataset mean. Onsets and decays are followed closely; deviations concentrate in amplitude overshoot on sparse transients and in the broadband moving motor vehicle texture. Mean E-L1 0.0230, against T-Foley 0.0344 and MambaFoley 0.0374.</figcaption>
     </figure>
   </div>
 </section>
@@ -517,12 +516,12 @@ const SAMPLES_PER_SCENE = 2;
 
 const SCENES = [
   { key: "dog_bark",     label: "Dog bark" },
-  { key: "footstep",     label: "Foot step" },
-  { key: "gunshot",      label: "Gun shot" },
+  { key: "footstep",     label: "Footstep" },
+  { key: "gunshot",      label: "Gunshot" },
   { key: "keyboard",     label: "Keyboard" },
   { key: "moving_motor_vehicle", label: "Moving motor vehicle" },
   { key: "rain",         label: "Rain" },
-  { key: "sneeze_cough", label: "Sneeze / cough" }
+  { key: "sneeze_cough", label: "Sneeze/cough" }
 ];
 
 const SYSTEMS = [
