@@ -55,7 +55,8 @@ Three things distinguish the model:
 ## Results
 
 Averaged over the seven scenes on DCASE 2023 Task 7. SB-CFM reaches FAD 2.75, a 42.3% reduction
-over the strongest baseline. All numbers come from a single training run without seed averaging.
+over the strongest baseline. The table reports one model (seed 0); five independent training runs
+leave the ordering unchanged on every axis.
 
 | Model | FAD ↓ | KAD ↓ | Acc ↑ | Density ↑ | Cover. ↑ | CLAP ↑ | E-L1 ↓ |
 |---|---|---|---|---|---|---|---|
@@ -63,14 +64,17 @@ over the strongest baseline. All numbers come from a single training run without
 | MambaFoley | 7.63 | 1.62 | 0.96 | 1.102 | 0.572 | 0.295 | 0.0374 |
 | T-Foley | 8.03 | 2.29 | 0.93 | 1.000 | 0.528 | 0.285 | 0.0344 |
 | AudioLDM | 4.77 | 0.86 | 0.98 | 1.001 | 0.564 | **0.358** | – |
+| SB-CFM (ours, class only) | 6.27 | 1.05 | 0.97 | 1.002 | 0.588 | 0.310 | – |
 | I-CFM (ours, indep. coupling) | 4.53 | 0.58 | 0.95 | 1.165 | 0.697 | 0.327 | 0.0232 |
 | OT-CFM (ours, intra-class OT, σ=0) | 3.56 | 0.57 | 0.97 | 1.320 | 0.705 | 0.335 | 0.0232 |
 | **SB-CFM (ours)** | **2.75** | **0.54** | **0.99** | **1.528** | **0.721** | 0.338 | **0.0230** |
 
 The lower block is our own flow-matching variants, which share the architecture, conditioning,
 training schedule, guidance scale, and a 50-step Euler budget, and differ only in the flow
-formulation. Density and coverage (PANNs embeddings, k=5) replace the intra-class-diversity
-diagnostic used in earlier work; density is not capped at one.
+formulation. **SB-CFM (class only)** is the same model trained without the RMS envelope path, listed
+among the class-only systems so the two conditioning regimes can be compared like for like. Density
+and coverage (PANNs embeddings, k=5) replace the intra-class-diversity diagnostic used in earlier
+work; density is not capped at one.
 
 SB-CFM is best on six of the seven metrics — FAD, KAD, accuracy, density, coverage, and E-L1.
 The E-L1 margin belongs to the RMS conditioning rather than to the flow formulation: it is flat
@@ -81,9 +85,12 @@ language–audio pre-training is expected to favour a text-embedding metric that
 model, trained only on this small corpus, does not directly optimize. E-L1 applies only to
 temporally conditioned models.
 
-Two caveats bound comparability. The AudioLDM checkpoint we run is the general-purpose model,
+Three caveats bound comparability. The AudioLDM checkpoint we run is the general-purpose model,
 not the challenge entry built on it, which added task-specific pre-training on external corpora.
-And a single guidance scale w = 3.0 is used throughout — every baseline at its published default,
+The conditioning is not uniform: MambaFoley, T-Foley, and all of our variants receive the RMS
+envelope of the corresponding evaluation clip, whereas PixelSNAIL and AudioLDM generate from the
+class label alone, which is why the class-only row is in the table. And a single guidance scale
+w = 3.0 is used throughout — every baseline at its published default,
 all of our own variants sharing the same w — so the ablations vary the flow formulation alone.
 
 ### Per scene
@@ -111,6 +118,22 @@ sustained. SB-CFM holds or
 shares the lowest FAD in six of the seven scenes; the one it loses is gunshot, the sparsest and
 most impulsive class, whose identity rests on a single onset that smoothing the transport interior
 is least suited to preserve.
+
+### Subjective MOS
+
+Thirty listeners rated five systems on two five-point scales, perceptual audio quality and
+fit-to-category, under opaque filenames in random order within each scene — 210 ratings per system
+per axis.
+
+| System | Quality MOS ↑ | Fit MOS ↑ |
+|---|---|---|
+| PixelSNAIL | 1.97 ± 0.79 | 2.01 ± 0.82 |
+| T-Foley | 3.30 ± 0.84 | 3.46 ± 0.83 |
+| MambaFoley | 3.37 ± 0.85 | 3.52 ± 0.83 |
+| AudioLDM | 4.06 ± 0.74 | 4.14 ± 0.71 |
+| **SB-CFM (ours)** | **4.16 ± 0.68** | **4.26 ± 0.65** |
+
+SB-CFM is rated highest on both axes, and highest in six of the seven scenes.
 
 ![Mel-spectrogram comparison across the seven Foley categories, one row per system: the original recording, PixelSNAIL, MambaFoley, T-Foley, AudioLDM, I-CFM, OT-CFM, and SB-CFM.](assets/spectrograms.png)
 
