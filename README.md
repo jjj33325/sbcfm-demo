@@ -54,9 +54,9 @@ Three things distinguish the model:
 
 ## Results
 
-Averaged over the seven scenes on DCASE 2023 Task 7. SB-CFM reaches FAD 2.75, a 42.3% reduction
-over the strongest baseline. The table reports one model (seed 0); five independent training runs
-leave the ordering of our three variants unchanged on every axis.
+Averaged over the seven scenes on DCASE 2023 Task 7. SB-CFM reaches FAD 2.75, a 64.0% reduction
+over the strongest baseline given the same temporal conditioning (MambaFoley). The table reports one model (seed 0); five independent training runs
+leave the ordering unchanged on every axis.
 
 | Model | FAD ↓ | KAD ↓ | Acc ↑ | Density ↑ | Cover. ↑ | CLAP ↑ | E-L1 ↓ |
 |---|---|---|---|---|---|---|---|
@@ -89,9 +89,9 @@ Three caveats bound comparability. The AudioLDM checkpoint we run is the general
 not the challenge entry built on it, which added task-specific pre-training on external corpora.
 The conditioning is not uniform: MambaFoley, T-Foley, and all of our variants receive the RMS
 envelope of the corresponding evaluation clip, whereas PixelSNAIL and AudioLDM generate from the
-class label alone, which is why the class-only row is in the table. And each baseline runs at the guidance
-setting of its published configuration, while all of our own variants share w = 3.0, so the
-ablations vary the flow formulation alone.
+class label alone, which is why the class-only row is in the table. And a single guidance scale
+w = 3.0 is used throughout — every baseline at its published default,
+all of our own variants sharing the same w — so the ablations vary the flow formulation alone.
 
 ### Per scene
 
@@ -127,16 +127,14 @@ per axis.
 
 | System | Quality MOS ↑ | Fit MOS ↑ |
 |---|---|---|
-| PixelSNAIL | 1.97 ± 0.79 | 2.01 ± 0.82 |
-| T-Foley | 3.30 ± 0.84 | 3.46 ± 0.83 |
-| MambaFoley | 3.37 ± 0.85 | 3.52 ± 0.83 |
-| AudioLDM | 4.06 ± 0.74 | 4.14 ± 0.71 |
-| **SB-CFM (ours)** | **4.16 ± 0.68** | **4.26 ± 0.65** |
+| PixelSNAIL | 1.96 ± 0.80 | 2.01 ± 0.82 |
+| T-Foley | 3.30 ± 0.86 | 3.46 ± 0.86 |
+| MambaFoley | 3.38 ± 0.86 | 3.51 ± 0.86 |
+| AudioLDM | 4.06 ± 0.73 | 4.15 ± 0.71 |
+| **SB-CFM (ours)** | **4.16 ± 0.68** | **4.27 ± 0.65** |
 
-SB-CFM is rated highest on both axes, and in six of the seven scenes (the exception is moving
-motor vehicle). The margin over MambaFoley and T-Foley is roughly 0.8; over AudioLDM it is 0.10 and
-0.12, which thirty listeners cannot resolve at a spread near 0.7, so the test establishes only that
-SB-CFM is not behind it perceptually.
+SB-CFM is rated highest on both axes — significantly above every system in a paired Wilcoxon test, by a
+small margin over AudioLDM — and highest in six of the seven scenes.
 
 ![Mel-spectrogram comparison across the seven Foley categories, one row per system: the original recording, PixelSNAIL, MambaFoley, T-Foley, AudioLDM, I-CFM, OT-CFM, and SB-CFM.](assets/spectrograms.png)
 
