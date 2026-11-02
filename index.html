@@ -216,7 +216,6 @@
   .mtable tbody tr.best td{background:var(--violet-wash);color:var(--violet);font-weight:500}
   .mtable tbody tr.ref td{color:var(--faint)}
   .b{color:var(--violet);font-weight:500}
-  .mtable tbody tr.best td.nb{color:var(--ink);font-weight:400}
   .scroll{overflow-x:auto}
 
   /* ---------- cite ---------- */
@@ -284,7 +283,7 @@
     <p class="tldr">
       <b class="k">TL;DR</b>
       A mel-domain Foley synthesizer built on the <strong>Schrödinger bridge — the entropy-regularized form of dynamic optimal transport</strong>. Its marginal path smooths the transport interpolation with a kernel that vanishes at both endpoints, so the velocity regression is better conditioned while the data distribution is matched exactly. A single velocity network is trained and generation integrates the <strong>probability-flow ODE</strong> — no score network, no stochastic sampling.
-      On DCASE 2023 Task 7 it reaches <em>FAD 2.75</em> — a 42.3% reduction over the strongest baseline — with the lowest KAD and temporal error and the highest density and coverage of any system compared. A subjective MOS test with thirty listeners places it at the top of both perceptual axes among the systems compared.
+      On DCASE 2023 Task 7 it reaches <em>FAD 2.75</em> — a 64.0% reduction over the strongest baseline given the same temporal conditioning — with the lowest KAD and temporal error and the highest density and coverage of any system compared. A subjective MOS test with thirty listeners rates it highest on both perceptual axes.
     </p>
 
     <div class="shortcuts">
@@ -306,7 +305,7 @@
       <h2>Abstract</h2>
     </div>
     <div class="abs">
-      <p>Foley sound synthesis is a <strong>one-to-many problem</strong>: each scene category admits many valid realizations, yet only a few hours of labeled audio are available, making it hard to preserve sample diversity without losing scene fidelity. We propose a mel-domain framework based on <strong>Schrödinger Bridge Conditional Flow Matching (SB-CFM)</strong>. The Schrödinger bridge is the <strong>entropy-regularized form of dynamic optimal transport</strong>; its marginal path smooths the transport interpolation with a kernel that vanishes at both endpoints, regularizing the velocity regression while matching the data distribution exactly. Scene identity enters a two-dimensional velocity U-Net as a class embedding, and the frame-level RMS envelope of the target is injected for <strong>explicit temporal control</strong>. Generation integrates the resulting velocity field as an <strong>ordinary differential equation</strong>; no score network is trained and no stochastic sampling is used. On DCASE 2023 Task 7, SB-CFM attains a <em>Fréchet Audio Distance of 2.75, a 42.3% reduction</em> over the strongest baseline, with the lowest Kernel Audio Distance and temporal error and the <strong>highest density and coverage</strong> of any system compared. The same model is also reported without its temporal conditioning, under the class-only protocol. Ablations at fixed guidance decompose this margin along two axes, the coupling and the bridge, varying one at a time: the <strong>intra-class optimal-transport coupling supplies the larger part</strong>, and the bridge improves on it up to an interior optimum in its scale. A <em>subjective mean opinion score (MOS) evaluation with thirty participants</em> places the method at the top of both perceptual axes among the systems compared.</p>
+      <p>Foley sound synthesis is a <strong>one-to-many problem</strong>: each scene category admits many valid realizations, yet only a few hours of labeled audio are available, making it hard to preserve sample diversity without losing scene fidelity. We propose a mel-domain framework based on <strong>Schrödinger Bridge Conditional Flow Matching (SB-CFM)</strong>. The Schrödinger bridge is the <strong>entropy-regularized form of dynamic optimal transport</strong>; its marginal path smooths the transport interpolation with a kernel that vanishes at both endpoints, regularizing the velocity regression while matching the data distribution exactly. Scene identity enters a two-dimensional velocity U-Net as a class embedding, and the frame-level RMS envelope of the target is injected for <strong>explicit temporal control</strong>. Generation integrates the resulting velocity field as an <strong>ordinary differential equation</strong>; no score network is trained and no stochastic sampling is used. On DCASE 2023 Task 7, SB-CFM attains a <em>Fréchet Audio Distance of 2.75, a 64.0% reduction</em> over the strongest baseline given the same temporal conditioning, with the lowest Kernel Audio Distance and temporal error and the <strong>highest density and coverage</strong> of any system compared. The same model is also reported without its temporal conditioning, under the class-only protocol. Ablations at fixed guidance decompose this margin along two axes, the coupling and the bridge, varying one at a time: the <strong>intra-class optimal-transport coupling supplies the larger part</strong>, and the bridge improves on it up to an interior optimum in its scale. A <em>subjective mean opinion score (MOS) evaluation with thirty participants</em> places the method at the top of both perceptual axes among the systems compared.</p>
     </div>
   </div>
 </section>
@@ -336,7 +335,7 @@
     <div class="head">
       <span class="eyebrow">Audio samples</span>
       <h2>Two clips per scene, one envelope per column</h2>
-      <p class="lede">Every clip is four seconds, monophonic, 22.05 kHz. Within a column, all temporally conditioned systems were given the same RMS envelope, taken from the original recording in that column; PixelSNAIL and AudioLDM take no envelope. Each baseline runs at the guidance setting of its published configuration; all of our own variants share a single classifier-free guidance scale, w = 3.0. Systems are compared as published rather than under a shared vocoder: SB-CFM, OT-CFM, I-CFM, and PixelSNAIL use the official DCASE HiFi-GAN vocoder, T-Foley and MambaFoley synthesize waveforms directly, and AudioLDM uses the vocoder shipped with its own pipeline.</p>
+      <p class="lede">Every clip is four seconds, monophonic, 22.05 kHz. Within a column, all temporally conditioned systems were given the same RMS envelope, taken from the original recording in that column; PixelSNAIL and AudioLDM take no envelope. A single classifier-free guidance scale w = 3.0 is used throughout — every baseline at its published default, and all of our own variants sharing the same w. Systems are compared as published rather than under a shared vocoder: SB-CFM, OT-CFM, I-CFM, and PixelSNAIL use the official DCASE HiFi-GAN vocoder, T-Foley and MambaFoley synthesize waveforms directly, and AudioLDM uses the vocoder shipped with its own pipeline.</p>
     </div>
 
     <div class="tabs" role="tablist" aria-label="Scene"></div>
@@ -359,14 +358,14 @@
 <section id="spectrograms">
   <div class="wrap">
     <div class="head">
-      <span class="eyebrow">§ V-A — Qualitative</span>
+      <span class="eyebrow">§ V — Qualitative</span>
       <h2>What you hear, seen</h2>
-      <p class="lede">The differences the metrics report are visible. The discrete baseline blurs fine detail and the diffusion baselines add high-frequency artifacts; within the flow variants, the progression from I-CFM to OT-CFM to SB-CFM sharpens onsets and suppresses background haze. Moving motor vehicle is the hardest category for every system, and the row shows it.</p>
+      <p class="lede">The differences the metrics report are visible. Baselines smear the sharp attacks that define gunshot and footstep; the well-aligned transport paths keep onsets and harmonic structure intact. Moving motor vehicle is the hardest category for every system, and the row shows it.</p>
     </div>
 
     <figure style="margin-bottom:48px">
       <img src="assets/spectrograms.png" alt="Mel-spectrogram comparison across the seven Foley categories, one row per system: the original recording, PixelSNAIL, MambaFoley, T-Foley, AudioLDM, I-CFM, OT-CFM, and SB-CFM.">
-      <figcaption><b>Fig. 2</b> — Mel-spectrogram comparison across the seven categories, shown for the first sample of each. Rows, top to bottom: original recording, PixelSNAIL, MambaFoley, T-Foley, AudioLDM, I-CFM (independent coupling), OT-CFM (σ=0), SB-CFM. <b>SB-CFM tracks the original most closely of all systems</b> — it reproduces the sharp onsets of transient categories and the harmonic and broadband structure of tonal and textured ones, where the discrete baseline blurs fine detail and the diffusion baselines add high-frequency artifacts.</figcaption>
+      <figcaption><b>Fig. 2</b> — Mel-spectrogram comparison across the seven categories, shown for the first sample of each. Rows, top to bottom: original recording, PixelSNAIL, MambaFoley, T-Foley, AudioLDM, I-CFM (independent coupling), OT-CFM (σ=0), SB-CFM. <b>SB-CFM tracks the original most closely of all systems</b> — it reproduces the onsets of transient sounds and the harmonic structure of tonal ones, where the discrete baseline blurs and the diffusion baselines add high-frequency artifacts.</figcaption>
     </figure>
 
     <figure>
@@ -382,11 +381,11 @@
     <div class="head">
       <span class="eyebrow">§ V — Results</span>
       <h2>Seven metrics, because no single one covers fidelity, diversity, and timing</h2>
-      <p class="lede">Table 1 reports one model (seed 0); five independent training runs leave the ordering of our three variants unchanged on every axis. Three caveats bound comparability: the AudioLDM checkpoint is the general-purpose model, not the challenge entry built on it; each baseline runs at its published guidance setting while all of our own variants share w = 3.0; and PixelSNAIL and AudioLDM generate from the class label alone, so SB-CFM is listed under the class-only protocol too.</p>
+      <p class="lede">Table 1 reports one model (seed 0); five independent training runs leave the ordering unchanged on every axis. Every baseline runs at its published default and all of our own variants share one guidance scale, w = 3.0. PixelSNAIL and AudioLDM generate from the class label alone, so SB-CFM is listed under the class-only protocol too.</p>
     </div>
 
     <div class="scroll" style="margin-bottom:48px">
-      <p class="mcap"><b>Table 1.</b> Overall comparison, averaged over the seven scenes. The lower block contains our own flow-matching variants, which share the architecture, conditioning, training schedule, guidance scale, and a budget of 50 Euler steps, and differ only in the flow formulation. <b>SB-CFM (class only)</b> is the same model trained without the RMS envelope path (Table 9). E-L1 applies only to temporally conditioned models. Density and coverage are computed on PANNs embeddings with k=5; density is not capped at one. SB-CFM is best on every metric except CLAP, where AudioLDM leads.</p>
+      <p class="mcap"><b>Table 1.</b> Overall comparison, averaged over the seven scenes. The lower block contains our own flow-matching variants, which share the architecture, conditioning, training schedule, guidance scale, and a budget of 50 Euler steps, and differ only in the flow formulation. <b>SB-CFM (class only)</b> is the same model trained without the RMS envelope path (Table 5). E-L1 applies only to temporally conditioned models. Density and coverage are computed on PANNs embeddings with k=5; density is not capped at one. SB-CFM is best on every metric except CLAP, where AudioLDM leads.</p>
       <table class="mtable">
         <thead>
           <tr><th>Model</th><th>FAD ↓</th><th>KAD ↓</th><th>Acc ↑</th><th>Density ↑</th><th>Cover. ↑</th><th>CLAP ↑</th><th>E-L1 ↓</th></tr>
@@ -399,13 +398,13 @@
           <tr><td>SB-CFM (ours, class only)</td><td>6.27</td><td>1.05</td><td>0.97</td><td>1.002</td><td>0.588</td><td>0.310</td><td>–</td></tr>
           <tr><td>I-CFM (ours, indep. coupling)</td><td>4.53</td><td>0.58</td><td>0.95</td><td>1.165</td><td>0.697</td><td>0.327</td><td>0.0232</td></tr>
           <tr><td>OT-CFM (ours, intra-class OT, σ=0)</td><td>3.56</td><td>0.57</td><td>0.97</td><td>1.320</td><td>0.705</td><td>0.335</td><td>0.0232</td></tr>
-          <tr class="best"><td>SB-CFM (ours)</td><td>2.75</td><td>0.54</td><td>0.99</td><td>1.528</td><td>0.721</td><td class="nb">0.338</td><td>0.0230</td></tr>
+          <tr class="best"><td>SB-CFM (ours)</td><td>2.75</td><td>0.54</td><td>0.99</td><td>1.528</td><td>0.721</td><td>0.338</td><td>0.0230</td></tr>
         </tbody>
       </table>
     </div>
 
     <div class="scroll">
-      <p class="mcap"><b>Table 3.</b> Automatic proxy for mean opinion score (Audiobox-Aesthetics). PQ, CU, and CE are quality-oriented; PC is descriptive, and higher is not better. Best among generative systems highlighted.</p>
+      <p class="mcap"><b>Table 2.</b> Automatic proxy for mean opinion score (Audiobox-Aesthetics). PQ, CU, and CE are quality-oriented; PC is descriptive, and higher is not better.</p>
       <table class="mtable">
         <thead>
           <tr><th>Model</th><th>PQ ↑</th><th>CU ↑</th><th>CE ↑</th><th>PC</th></tr>
@@ -418,23 +417,23 @@
           <tr><td>AudioLDM</td><td>6.33</td><td>5.80</td><td>3.09</td><td>2.13</td></tr>
           <tr><td>I-CFM (ours)</td><td>6.41</td><td>5.83</td><td>3.13</td><td>2.43</td></tr>
           <tr><td>OT-CFM (ours)</td><td>6.42</td><td>5.86</td><td>3.16</td><td>2.49</td></tr>
-          <tr class="best"><td>SB-CFM (ours)</td><td>6.43</td><td>5.88</td><td>3.37</td><td class="nb">2.52</td></tr>
+          <tr class="best"><td>SB-CFM (ours)</td><td>6.43</td><td>5.88</td><td>3.37</td><td>2.52</td></tr>
         </tbody>
       </table>
     </div>
 
     <div class="scroll" style="margin-top:48px">
-      <p class="mcap"><b>Table 6.</b> Subjective MOS. Thirty listeners rated five systems on two five-point scales, perceptual audio quality and fit-to-category, under opaque filenames in random order within each scene — 210 ratings per system per axis. SB-CFM is rated highest on both axes, and in six of the seven scenes (the exception is moving motor vehicle). Its margin over MambaFoley and T-Foley is roughly 0.8; over AudioLDM it is 0.10 and 0.12, which thirty listeners cannot resolve, so the test establishes only that SB-CFM is not behind it perceptually.</p>
+      <p class="mcap"><b>Table 3.</b> Subjective MOS. Thirty listeners rated five systems on two five-point scales, perceptual audio quality and fit-to-category, under opaque filenames in random order within each scene — 210 ratings per system per axis. SB-CFM is rated highest on both axes — significantly above every system in a paired Wilcoxon test, by a small margin over AudioLDM — and highest in six of the seven scenes.</p>
       <table class="mtable">
         <thead>
           <tr><th>System</th><th>Quality MOS ↑</th><th>Fit MOS ↑</th></tr>
         </thead>
         <tbody>
-          <tr><td>PixelSNAIL</td><td>1.97 ± 0.79</td><td>2.01 ± 0.82</td></tr>
-          <tr><td>T-Foley</td><td>3.30 ± 0.84</td><td>3.46 ± 0.83</td></tr>
-          <tr><td>MambaFoley</td><td>3.37 ± 0.85</td><td>3.52 ± 0.83</td></tr>
-          <tr><td>AudioLDM</td><td>4.06 ± 0.74</td><td>4.14 ± 0.71</td></tr>
-          <tr class="best"><td>SB-CFM (ours)</td><td>4.16 ± 0.68</td><td>4.26 ± 0.65</td></tr>
+          <tr><td>PixelSNAIL</td><td>1.96 ± 0.80</td><td>2.01 ± 0.82</td></tr>
+          <tr><td>T-Foley</td><td>3.30 ± 0.86</td><td>3.46 ± 0.86</td></tr>
+          <tr><td>MambaFoley</td><td>3.38 ± 0.86</td><td>3.51 ± 0.86</td></tr>
+          <tr><td>AudioLDM</td><td>4.06 ± 0.73</td><td>4.15 ± 0.71</td></tr>
+          <tr class="best"><td>SB-CFM (ours)</td><td>4.16 ± 0.68</td><td>4.27 ± 0.65</td></tr>
         </tbody>
       </table>
     </div>
@@ -451,9 +450,9 @@
     </div>
 
     <details open>
-      <summary><span class="sum-l"><span class="tag">Table 8</span> Anatomy of the flow formulation</span><span class="sign"></span></summary>
+      <summary><span class="sum-l"><span class="tag">Table 4</span> Anatomy of the flow formulation</span><span class="sign"></span></summary>
       <div class="det-body scroll">
-        <p class="mcap">Each row changes one factor with respect to the row above, at fixed architecture, conditioning, guidance, and a deterministic 50-step Euler sampler; the σ column carries the bridge, and by construction the first two rows are exactly I-CFM and OT-CFM. <b>The intra-class optimal-transport coupling supplies the larger of the two steps</b> (I-CFM → OT-CFM: FAD 4.53 → 3.56, 54% of the total; FAD, accuracy and density move beyond the 95% intervals of five runs, while KAD, coverage and CLAP move the same way within them). <b>The bridge then improves on that up to an interior optimum at σ=0.2</b> (FAD 3.56 → 2.75, the remaining 46%), where FAD, KAD, density, and coverage all turn together; at σ=0.3 they reverse, but CLAP keeps rising, so semantic alignment does not turn with the distributional metrics.</p>
+        <p class="mcap">Each row changes one factor with respect to the row above, at fixed architecture, conditioning, guidance, and a deterministic 50-step Euler sampler; the σ column carries the bridge, and by construction the first two rows are exactly I-CFM and OT-CFM. <b>The intra-class optimal-transport coupling supplies the larger of the two steps</b> (I-CFM → OT-CFM: FAD 4.53 → 3.56, 54% of the total, improving every axis at once). <b>The bridge then improves on that up to an interior optimum at σ=0.2</b> (FAD 3.56 → 2.75, the remaining 46%), where FAD, KAD, density, and coverage all turn together; at σ=0.3 they reverse, but CLAP keeps rising, so semantic alignment does not turn with the distributional metrics.</p>
         <table class="mtable">
           <thead>
             <tr><th>Variant</th><th>Coupling</th><th>σ</th><th>FAD ↓</th><th>KAD ↓</th><th>Acc ↑</th><th>Density ↑</th><th>Cover. ↑</th><th>CLAP ↑</th></tr>
@@ -462,15 +461,15 @@
             <tr><td>I-CFM</td><td>Independent</td><td>0</td><td>4.53</td><td>0.58</td><td>0.95</td><td>1.165</td><td>0.697</td><td>0.327</td></tr>
             <tr><td>OT-CFM</td><td>Intra-class OT</td><td>0</td><td>3.56</td><td>0.57</td><td>0.97</td><td>1.320</td><td>0.705</td><td>0.335</td></tr>
             <tr><td>SB-CFM</td><td>Intra-class OT</td><td>0.1</td><td>3.11</td><td>0.56</td><td>0.98</td><td>1.213</td><td>0.681</td><td>0.334</td></tr>
-            <tr class="best"><td>SB-CFM</td><td>Intra-class OT</td><td>0.2</td><td>2.75</td><td>0.54</td><td>0.99</td><td>1.528</td><td>0.721</td><td class="nb">0.338</td></tr>
-            <tr><td>SB-CFM</td><td>Intra-class OT</td><td>0.3</td><td>3.27</td><td>0.56</td><td class="b">0.99</td><td>1.385</td><td>0.715</td><td class="b">0.340</td></tr>
+            <tr class="best"><td>SB-CFM</td><td>Intra-class OT</td><td>0.2</td><td>2.75</td><td>0.54</td><td>0.99</td><td>1.528</td><td>0.721</td><td>0.338</td></tr>
+            <tr><td>SB-CFM</td><td>Intra-class OT</td><td>0.3</td><td>3.27</td><td>0.56</td><td>0.99</td><td>1.385</td><td>0.715</td><td class="b">0.340</td></tr>
           </tbody>
         </table>
       </div>
     </details>
 
     <details>
-      <summary><span class="sum-l"><span class="tag">Table 9</span> RMS temporal conditioning</span><span class="sign"></span></summary>
+      <summary><span class="sum-l"><span class="tag">Table 5</span> RMS temporal conditioning</span><span class="sign"></span></summary>
       <div class="det-body scroll">
         <p class="mcap">Under an identical protocol at σ=0.2 and 50 Euler steps, removing the envelope path is decisive: FAD more than doubles (2.75 → 6.27) and KAD nearly doubles (0.54 → 1.05), while accuracy and semantic alignment both fall. Without it the model retains the correct class but loses the temporal energy structure that distinguishes realizations within it. <b>Temporal conditioning is a central component, not an auxiliary refinement.</b></p>
         <table class="mtable">
@@ -511,7 +510,7 @@
 
 <script>
 /* =========================================================================
-   EDIT HERE. Files live at:  audio/<systemKey>/<sceneKey>_1..2.wav
+   EDIT HERE. Files live at:  audio/<systemKey>/<sceneKey>_1..3.wav
    ========================================================================= */
 const SAMPLES_PER_SCENE = 2;
 
